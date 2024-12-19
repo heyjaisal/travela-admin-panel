@@ -73,9 +73,9 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 p-6">
+    <div className="flex flex-col md:flex-row gap-6 p-2">
       {/* Admin Form Card */}
-      <div className="w-full md:w-1/2 bg-white shadow-md rounded-lg p-6">
+      <div className="w-full md:w-1/2 bg-white shadow-md rounded-lg p-2">
         <h2 className="text-xl font-bold mb-4">Create Admin</h2>
         {error && <p className="text-red-500 mb-2">{error}</p>}
         {success && <p className="text-green-500 mb-2">{success}</p>}
@@ -160,7 +160,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Admin List Card */}
-      <div className="w-full md:w-1/2 bg-white shadow-md rounded-lg p-6">
+      <div className="w-full md:w-1/2 bg-white shadow-md rounded-lg p-2">
         <h2 className="text-xl font-bold mb-4">Admins</h2>
         <div className="space-y-4">
           {admins && admins.length > 0 ? (

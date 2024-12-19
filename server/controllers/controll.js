@@ -38,7 +38,6 @@ exports.loginSuperAdmin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    console.log("hello user")
     const user = await Admin.findOne({
       email,
       $or: [{ role: "superadmin" }, { role: "admin" }],

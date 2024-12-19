@@ -11,6 +11,7 @@ import AdminMessages from './Pages/Admin/Messages';
 import AdminCreate from './Pages/Admin/Create';
 import AdminApproval from './Pages/Admin/Approval';
 import AdminProfileSettings from './Pages/Admin/ProfileSettings';
+import Dashboard from './Pages/Admin/Dashboard';
 
 const App = () => {
   return (
@@ -21,7 +22,7 @@ const App = () => {
 
         {/* Admin Dashboard Routes */}
         <Route element={<AdminDashboardLayout />}>
-          <Route path="/home" element={<AdminHome />} />
+          <Route path="/home" element={<Dashboard />} />
           <Route path="/all-users" element={<AllUsers />} />
           <Route path="/payments" element={<AdminPayments />} />
           <Route path="/requests" element={<AdminRequests />} />

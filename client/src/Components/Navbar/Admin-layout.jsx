@@ -42,7 +42,7 @@ const AdminDashboardLayout = () => {
   return (
         <div className="flex h-screen">
           <AdminNavbar role={userRole} />
-          <div className="flex-1 p-1 overflow-auto bg-lightBg">
+          <div className="flex-1 overflow-auto bg-lightBg">
             <Outlet />
           </div>
         </div>
