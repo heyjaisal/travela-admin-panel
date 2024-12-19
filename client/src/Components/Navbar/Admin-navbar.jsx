@@ -149,11 +149,11 @@ const AdminNavbar = ({role}) => {
           <NavLink
             to="/profile-settings"
             className={({ isActive }) =>
-              `flex items-center gap-4 p-3 rounded-xl ${isActive ? "text-blue-500" : ""}`
+              `flex flex-col items-center gap-1  ${isActive ? "text-blue-500" : ""}`
             }
           >
             <FaUser size={20} />
-            Profile & Settings
+            <span className="text-xs">Profile</span>
           </NavLink>
         </nav>
       </div>

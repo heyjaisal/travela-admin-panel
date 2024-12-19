@@ -116,15 +116,14 @@ exports.createAdmin = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
-        user: process.env.SMTP_USER, // Your Gmail email
-        pass: process.env.SMTP_PASS, // Your Gmail app password
+        user: process.env.SMTP_USER, 
+        pass: process.env.SMTP_PASS, 
       },
       tls: {
-        rejectUnauthorized: false, // Disable SSL certificate validation
+        rejectUnauthorized: false, 
       },
     });
 
-    // Email options
     const mailOptions = {
       from: process.env.SMTP_USER,
       to: personalEmail,
@@ -187,19 +186,15 @@ exports.Gethost = async (req, res) => {
 
 
 exports.verifyAdmin = async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Extract the token
-  // console.log("Received Token:", token);
+  const token = req.headers.authorization?.split(" ")[1];
   
   if (!token) {
     return res.status(401).json({ message: "No token provided" });
   }
 
   try {
-    // Decode the token
-    console.log('hello pranav')
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Find the user using the ID from the token and ensure the role is "superadmin"
     const user = await Admin.findOne({ _id: decoded.id, role: "superadmin" });
     console.log("User Found:", user);
 
@@ -207,7 +202,6 @@ exports.verifyAdmin = async (req, res) => {
       return res.status(401).json({ message: "Superadmin not found" });
     }
 
-    // Send the role in the response
     res.status(200).json({ role: user.role });
 
   } catch (error) {
