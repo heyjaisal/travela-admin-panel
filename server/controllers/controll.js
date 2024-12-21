@@ -55,7 +55,6 @@ exports.loginSuperAdmin = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
     );
     const dashboard = user.role === "superadmin" ? "home" : "all-users";
 
@@ -195,13 +194,13 @@ exports.verifyAdmin = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await Admin.findOne({ _id: decoded.id, role: "superadmin" });
-    console.log("User Found:", user);
 
     if (!user) {
       return res.status(401).json({ message: "Superadmin not found" });
     }
 
     res.status(200).json({ role: user.role });
+    
 
   } catch (error) {
     console.error("Token verification failed:", error);
