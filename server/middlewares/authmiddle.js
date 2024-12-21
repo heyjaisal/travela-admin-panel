@@ -1,27 +1,14 @@
 const jwt = require('jsonwebtoken');
 
 
-const verifySuperAdmin = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1]; 
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.status(403).json({ error: 'No token provided' });
 
-  if (!token) {
-    return res.status(401).json({ message: 'Access denied. No token provided.' });
-  }
-
-  try {
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-
-    if (decoded.role !== 'superadmin') {
-      return res.status(403).json({ message: 'Access denied. Only superadmins can perform this action.' });
-    }
-
-    req.user = decoded;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) return res.status(403).json({ error: 'Token is invalid' });
+    req.user = decoded;  // Attach decoded data to request
     next();
-  } catch (error) {
-    res.status(400).json({ message: 'Invalid token.' });
-  }
+  });
 };
-
-module.exports = verifySuperAdmin;
+module.exports = verifyToken;

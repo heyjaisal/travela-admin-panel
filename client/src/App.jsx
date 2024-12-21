@@ -1,39 +1,111 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './Pages/Login/Login';
-import AdminDashboardLayout from './Components/Navbar/Admin-layout';
-import AdminHome from './Pages/Admin/Home';
-import AllUsers from './Pages/Admin/AllUsers';
-import AdminPayments from './Pages/Admin/Payment';
-import AdminRequests from './Pages/Admin/Payment';
-import AdminNotifications from './Pages/Admin/Notification';
-import AdminMessages from './Pages/Admin/Messages';
-import AdminCreate from './Pages/Admin/Create';
-import AdminApproval from './Pages/Admin/Approval';
-import AdminProfileSettings from './Pages/Admin/ProfileSettings';
-import Dashboard from './Pages/Admin/Dashboard';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./Pages/Login/Login";
+import AdminDashboardLayout from "./Components/Navbar/Admin-layout";
+import AllUsers from "./Pages/Admin/AllUsers";
+import AdminPayments from "./Pages/Admin/Payment";
+import AdminRequests from "./Pages/Admin/Payment";
+import AdminNotifications from "./Pages/Admin/Notification";
+import AdminMessages from "./Pages/Admin/Messages";
+import AdminCreate from "./Pages/Admin/Create";
+import AdminApproval from "./Pages/Admin/Approval";
+import AdminProfileSettings from "./Pages/Admin/ProfileSettings";
+import Dashboard from "./Pages/Admin/Dashboard";
+import RoleBasedRoute from "./Components/utils/Protectedroutes"; 
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        {/* Public Route */}
+        
         <Route path="/" element={<Login />} />
 
-        {/* Admin Dashboard Routes */}
         <Route element={<AdminDashboardLayout />}>
-          <Route path="/home" element={<Dashboard />} />
-          <Route path="/all-users" element={<AllUsers />} />
-          <Route path="/payments" element={<AdminPayments />} />
-          <Route path="/requests" element={<AdminRequests />} />
-          <Route path="/notifications" element={<AdminNotifications />} />
-          <Route path="/messages" element={<AdminMessages />} />
-          <Route path="/create" element={<AdminCreate />} />
-          <Route path="/approval" element={<AdminApproval />} />
-          <Route path="/profile-settings" element={<AdminProfileSettings />} />
+          <Route
+            path="/home"
+            element={
+              <RoleBasedRoute allowedRoles={["superadmin", "marketingadmin"]}>
+                <Dashboard />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/all-users"
+            element={
+              <RoleBasedRoute allowedRoles={["superadmin", "useradmin"]}>
+                <AllUsers />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/payments"
+            element={
+              <RoleBasedRoute allowedRoles={["superadmin", "financeadmin"]}>
+                <AdminPayments />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/requests"
+            element={
+              <RoleBasedRoute allowedRoles={["superadmin", "useradmin"]}>
+                <AdminRequests />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <RoleBasedRoute
+                allowedRoles={["superadmin", "marketingadmin", "useradmin",'financeadmin']}
+              >
+                <AdminNotifications />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <RoleBasedRoute
+                allowedRoles={["superadmin", "financeadmin", "useradmin",'marketingadmin']}
+              >
+                <AdminMessages />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/create"
+            element={
+              <RoleBasedRoute allowedRoles={["superadmin"]}>
+                <AdminCreate />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/approval"
+            element={
+              <RoleBasedRoute allowedRoles={["superadmin", "useradmin"]}>
+                <AdminApproval />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <RoleBasedRoute
+                allowedRoles={[
+                  "superadmin",
+                  "useradmin",
+                  "marketingadmin",
+                  "financeadmin",
+                ]}
+              >
+                <AdminProfileSettings />
+              </RoleBasedRoute>
+            }
+          />
         </Route>
 
-        {/* Fallback Route */}
         <Route path="*" element={<Login />} />
       </Routes>
     </Router>

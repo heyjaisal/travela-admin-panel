@@ -1,58 +1,58 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect,useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setRole } from "../../redux/authSlice";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({ email: '', password: '', global: '' });
+  const [errors, setErrors] = useState({ email: "", password: "", global: "" });
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const token = localStorage.getItem('token');
 
-  useEffect(() => {
-    if (token) {
-      navigate('/home');
-    }
-  }, [navigate, token]);
-
+  if (token) {
+    navigate('/home');
+  }
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     return passwordRegex.test(password);
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const newErrors = { email: '', password: '', global: '' };
+    const newErrors = { email: "", password: "", global: "" };
 
     if (!email) {
-      newErrors.email = 'Please enter your email.';
+      newErrors.email = "Please enter your email.";
     } else if (!validateEmail(email)) {
-      newErrors.email = 'Please enter a valid email address.';
+      newErrors.email = "Please enter a valid email address.";
     }
 
     if (!password) {
-      newErrors.password = 'Please enter your password.';
+      newErrors.password = "Please enter your password.";
     } else if (!validatePassword(password)) {
       newErrors.password =
-        'Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character.';
+        "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character.";
     }
 
     setErrors(newErrors);
 
-    // Focus on the first invalid input
     if (newErrors.email) {
-      document.getElementById('email').focus();
+      document.getElementById("email").focus();
       return;
     }
     if (newErrors.password) {
-      document.getElementById('password').focus();
+      document.getElementById("password").focus();
       return;
     }
 
@@ -61,11 +61,12 @@ const Login = () => {
         email,
         password,
       });
-
-      const { token } = response.data;
-
+  
+      const { token, role } = response.data;
+  
       if (token) {
         localStorage.setItem('token', token);
+        dispatch(setRole(role)); 
         navigate('/home');
       }
     } catch (err) {
@@ -124,35 +125,35 @@ const Login = () => {
           </div>
 
           <div className="mb-6">
-      <label
-        htmlFor="password"
-        className="block text-gray-600 font-medium mb-2"
-      >
-        Password
-      </label>
-      <div className="relative">
-        <input
-          type={showPassword ? "text" : "password"}
-          id="password"
-          placeholder="Enter your password"
-          className="w-full px-4 py-2 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button
-          type="button"
-          className="absolute inset-y-0 right-3 flex items-center text-gray-600"
-          onClick={() => setShowPassword((prev) => !prev)}
-        >
-          {showPassword ? "Hide" : "Show"}
-        </button>
-      </div>
-      {errors.password && (
-        <div className="text-red-500 text-sm mt-1" aria-live="assertive">
-          {errors.password}
-        </div>
-      )}
-    </div>
+            <label
+              htmlFor="password"
+              className="block text-gray-600 font-medium mb-2"
+            >
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                placeholder="Enter your password"
+                className="w-full px-4 py-2 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-3 flex items-center text-gray-600"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+            {errors.password && (
+              <div className="text-red-500 text-sm mt-1" aria-live="assertive">
+                {errors.password}
+              </div>
+            )}
+          </div>
 
           <button
             type="submit"

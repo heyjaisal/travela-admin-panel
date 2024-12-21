@@ -1,54 +1,33 @@
-import { Outlet, Navigate } from "react-router-dom";
-import AdminNavbar from "./Admin-navbar";
-import { useState, useEffect, useMemo, useCallback } from "react";
-import axios from "axios";
+import React from "react";
+import { useSelector } from "react-redux";
+import { Navigate, Outlet } from "react-router-dom";
+import AdminNavbar from "./Admin-navbar"; 
 
 const AdminDashboardLayout = () => {
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { role, isAuthenticated } = useSelector((state) => state.auth);
 
-  const token = localStorage.getItem("token");
 
-  const fetchUserRole = useCallback(async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/verify-token", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUserRole(response.data.role);
-      console.log(userRole);
-      
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+  if (!isAuthenticated) {
+    return <Navigate to="/" />;
+  }
 
-  useEffect(() => {
-    if (token && !userRole) {
-      fetchUserRole();
-    }
-  }, [token, fetchUserRole]);
-
-  const memoizedFetchUserRole = useMemo(() => fetchUserRole, [fetchUserRole]);
-
-  if (!token) {
-    return <Navigate to="/login" />;
+  if (
+    role !== "superadmin" &&
+    role !== "useradmin" &&
+    role !== "marketingadmin" &&
+    role !== "financeadmin"
+  ) {
+    return <Navigate to="/profile" />;
   }
 
   return (
-        <div className="flex h-screen">
-          <AdminNavbar role={userRole} />
-          <div className="flex-1 overflow-auto bg-lightBg">
-            <Outlet />
-          </div>
-        </div>
+    <div className="flex h-screen">
+      <AdminNavbar role={role} />
+      <div className="flex-1 overflow-auto bg-lightBg">
+        <Outlet />
+      </div>
+    </div>
   );
 };
 
 export default AdminDashboardLayout;
-
-

@@ -22,8 +22,8 @@ exports.createSuperAdmin = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || "superadmin",
-      position: position || "Chief Manager",
+      role: role ,
+      position: position 
     });
 
     await newSuperAdmin.save();
@@ -40,8 +40,15 @@ exports.loginSuperAdmin = async (req, res) => {
   try {
     const user = await Admin.findOne({
       email,
-      $or: [{ role: "superadmin" }, { role: "admin" }],
+      $or: [
+        { role: "superadmin" },
+        { role: "admin" },
+        { role: "marketingadmin" },
+        { role: "financeadmin" },
+        { role: "useradmin" },
+      ],
     });
+    
 
     if (!user) {
       return res.status(404).json({ error: "Super Admin not found." });
@@ -59,8 +66,9 @@ exports.loginSuperAdmin = async (req, res) => {
     const dashboard = user.role === "superadmin" ? "home" : "all-users";
 
     res.status(200).json({
-      message: `${user.role}logged in successfully.`,
+      message: `${user.role} logged in successfully.`,
       token,
+      role: user.role,  
       dashboard,
     });
   } catch (error) {
@@ -71,21 +79,19 @@ exports.loginSuperAdmin = async (req, res) => {
 
 exports.createAdmin = async (req, res) => {
   try {
-    const { name, email, password, role, position, personalEmail, mobile } =
+    const { name, email, password, role, position, mobile } =
       req.body;
 
-    console.log(name, email, password, role, position, personalEmail, mobile);
+    console.log(name, email, password, role, position, mobile);
 
     const existingAdmin = await Admin.findOne({
-      $or: [{ email }, { personalEmail }, { mobile }, { position }],
+      $or: [{ email }, { mobile }, { position }],
     });
 
     if (existingAdmin) {
       const duplicateField =
         existingAdmin.email === email
           ? "Email"
-          : existingAdmin.personalEmail === personalEmail
-          ? "Personal email"
           : existingAdmin.mobile === mobile
           ? "Mobile number"
           : "Position";
@@ -105,7 +111,6 @@ exports.createAdmin = async (req, res) => {
       password: hashedPassword,
       role,
       position,
-      personalEmail,
       mobile,
     });
     await newAdmin.save();
@@ -124,7 +129,7 @@ exports.createAdmin = async (req, res) => {
 
     const mailOptions = {
       from: process.env.SMTP_USER,
-      to: personalEmail,
+      to: email,
       subject: "Your Admin Dashboard Login Details",
       text: `Hello ${name},
 
@@ -182,29 +187,45 @@ exports.Gethost = async (req, res) => {
   }
 };
 
-
-exports.verifyAdmin = async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  
-  if (!token) {
-    return res.status(401).json({ message: "No token provided" });
-  }
+exports.updateAdmin = async (req, res) => {
+  const { name, email, password, role, position, personalEmail, mobile } = req.body;
+  const { id } = req.params;
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const admin = await Admin.findById(id);
+    if (!admin) return res.status(404).json({ error: 'Admin not found' });
 
-    const user = await Admin.findOne({ _id: decoded.id, role: "superadmin" });
-
-    if (!user) {
-      return res.status(401).json({ message: "Superadmin not found" });
+    // Optionally hash the password if it's provided
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      admin.password = hashedPassword;
     }
 
-    res.status(200).json({ role: user.role });
-    
+    // Update admin fields
+    admin.name = name || admin.name;
+    admin.email = email || admin.email;
+    admin.role = role || admin.role;
+    admin.position = position || admin.position;
+    admin.personalEmail = personalEmail || admin.personalEmail;
+    admin.mobile = mobile || admin.mobile;
 
+    await admin.save();
+    res.status(200).json({ admin, message: 'Admin updated successfully' });
   } catch (error) {
-    console.error("Token verification failed:", error);
-    res.status(401).json({ message: "Invalid or expired token" });
+    res.status(500).json({ error: 'Failed to update admin' });
   }
 };
 
+exports.deleteAdmin = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const admin = await Admin.findByIdAndDelete(id);
+    if (!admin) return res.status(404).json({ error: 'Admin not found' });
+
+    res.status(200).json({ message: 'Admin deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting admin:', error);
+    res.status(500).json({ error: 'Failed to delete admin' });
+  }
+};

@@ -6,9 +6,8 @@ const AdminDashboard = () => {
     name: '',
     email: '',
     password: '',
-    role: 'admin',
+    role: '',
     position: '',
-    personalEmail: '', 
     mobile: '', 
   });
 
@@ -16,13 +15,12 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/get-admin');
-        console.log('Admins data:', response.data); // Log response for debugging
-        setAdmins(response.data || []);  // Ensure admins is an array
+        console.log('Admins data:', response.data);
+        setAdmins(response.data || []);
       } catch (error) {
         console.error('Error fetching admins:', error);
         setError('Failed to fetch admins');
@@ -31,17 +29,38 @@ const AdminDashboard = () => {
     fetchAdmins();
   }, []);
 
- 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    
-    if (!formData.name || !formData.email || !formData.password || !formData.position || !formData.personalEmail || !formData.mobile) {
-      setError('All fields are required');
+    if (!formData.name ) {
+      setError('name is required');
       return;
     }
+
+    if ( !formData.email ) {
+      setError('email is required');
+      return;
+    }
+
+    if ( !formData.password ) {
+      setError('password is required');
+      return;
+    }
+    if ( !formData.position ) {
+      setError('postion is required');
+      return;
+    } 
+    if ( !formData.mobile ) {
+      setError('mobile number is required');
+      return;
+    }
+    if ( !formData.role ) {
+      setError('role is required');
+      return;
+    }
+
 
     try {
       const getAuthHeaders = () => {
@@ -50,16 +69,15 @@ const AdminDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         };
       };
-      const response = await axios.post('http://localhost:5000/api/create-admin', formData,getAuthHeaders());
+      const response = await axios.post('http://localhost:5000/api/create-admin', formData, getAuthHeaders());
       setAdmins([...admins, response.data.admin]);
       setSuccess('Admin created successfully');
       setFormData({
         name: '',
         email: '',
         password: '',
-        role: 'admin', 
+        role: '', 
         position: '',
-        personalEmail: '', 
         mobile: '',
       });
     } catch (error) {
@@ -70,6 +88,36 @@ const AdminDashboard = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  // Handle Edit
+  const handleEdit = (admin) => {
+    setFormData({
+      name: admin.name,
+      email: admin.email,
+      password: '',
+      role: admin.role,
+      position: admin.position,
+      mobile: admin.mobile,
+    });
+  };
+
+  // Handle Delete
+  const handleDelete = async (adminId) => {
+    try {
+      const getAuthHeaders = () => {
+        const token = localStorage.getItem("token");
+        return {
+          headers: { Authorization: `Bearer ${token}` },
+        };
+      };
+      await axios.delete(`http://localhost:5000/api/delete-admin/${adminId}`, getAuthHeaders());
+      setAdmins(admins.filter((admin) => admin._id !== adminId));
+      setSuccess('Admin deleted successfully');
+      setError('');
+    } catch (error) {
+      setError(error.response?.data?.error || 'Something went wrong while deleting');
+    }
   };
 
   return (
@@ -121,16 +169,6 @@ const AdminDashboard = () => {
             />
           </div>
           <div>
-            <label className="block font-medium">Personal Email</label>
-            <input
-              type="email"
-              name="personalEmail"
-              value={formData.personalEmail}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
-            />
-          </div>
-          <div>
             <label className="block font-medium">Mobile</label>
             <input
               type="text"
@@ -146,7 +184,7 @@ const AdminDashboard = () => {
               type="text"
               name="role"
               value={formData.role}
-              readOnly
+              onChange={handleChange}
               className="w-full border border-gray-300 rounded px-3 py-2"
             />
           </div>
@@ -172,6 +210,20 @@ const AdminDashboard = () => {
                   <p className="text-sm text-gray-500">{admin.position}</p>
                   <p className="text-sm text-gray-500">{admin.personalEmail}</p>
                   <p className="text-sm text-gray-500">{admin.mobile}</p>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEdit(admin)}
+                    className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(admin._id)}
+                    className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))
