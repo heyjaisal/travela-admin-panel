@@ -103,7 +103,7 @@ const AdminNavbar = () => {
           )}
 
           {/* Create link (only accessible by SuperAdmin and Subadmin) */}
-          {(isSuperAdmin || isSubadmin) && (
+          {(isSuperAdmin) && (
             <NavLink
               to="/create"
               className={({ isActive }) =>
@@ -288,6 +288,26 @@ const AdminNavbar = () => {
                   Create
                 </NavLink>
               )}
+              <NavLink
+            to="/notifications"
+            className={({ isActive }) =>
+              `flex items-center gap-4 p-3 rounded-xl ${isActive ? "bg-blue-600 text-white" : ""}`
+            }
+          >
+            <FaBell />
+            Notifications
+          </NavLink>
+
+          {/* Messages link (accessible by all admins) */}
+          <NavLink
+            to="/messages"
+            className={({ isActive }) =>
+              `flex items-center gap-4 p-3 rounded-xl ${isActive ? "bg-blue-600 text-white" : ""}`
+            }
+          >
+            <FaEnvelope />
+            Messages
+          </NavLink>
 
               <NavLink
                 to="/profile"

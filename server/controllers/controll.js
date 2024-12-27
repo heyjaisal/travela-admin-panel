@@ -42,8 +42,8 @@ exports.loginSuperAdmin = async (req, res) => {
       email,
       $or: [
         { role: "superadmin" },
-        { role: "admin" },
-        { role: "marketingadmin" },
+        { role: "subadmin" },
+        { role: "approver" },
         { role: "financeadmin" },
         { role: "useradmin" },
       ],
@@ -157,7 +157,12 @@ The Team`,
 
 exports.Getadmin = async (req, res) => {
   try {
-    const admins = await Admin.find({ role: "admin" });
+    const admins = await Admin.find({ $or: [
+      { role: "subadmin" },
+      { role: "approver" },
+      { role: "financeadmin" },
+      { role: "useradmin" },
+    ] });
     res.json(admins);
   } catch (error) {
     console.error("Error fetching admins:", error);

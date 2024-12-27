@@ -8,21 +8,21 @@ const AdminDashboard = () => {
     password: '',
     role: '',
     position: '',
-    mobile: '', 
+    mobile: '',
   });
 
   const [admins, setAdmins] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [adminToDelete, setAdminToDelete] = useState(null);
 
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/get-admin');
-        console.log('Admins data:', response.data);
         setAdmins(response.data || []);
       } catch (error) {
-        console.error('Error fetching admins:', error);
         setError('Failed to fetch admins');
       }
     };
@@ -34,33 +34,8 @@ const AdminDashboard = () => {
     setError('');
     setSuccess('');
 
-    if (!formData.name) {
-      setError('Name is required');
-      return;
-    }
-
-    if (!formData.email) {
-      setError('Email is required');
-      return;
-    }
-
-    if (!formData.password) {
-      setError('Password is required');
-      return;
-    }
-
-    if (!formData.position) {
-      setError('Position is required');
-      return;
-    }
-
-    if (!formData.mobile) {
-      setError('Mobile number is required');
-      return;
-    }
-
-    if (!formData.role) {
-      setError('Role is required');
+    if (!formData.name || !formData.email || !formData.password || !formData.position || !formData.mobile || !formData.role) {
+      setError('All fields are required');
       return;
     }
 
@@ -82,7 +57,7 @@ const AdminDashboard = () => {
         mobile: '',
       });
     } catch (error) {
-      setError(error.response?.data?.error || 'Something went wrong');
+      setError('Something went wrong');
     }
   };
 
@@ -104,29 +79,30 @@ const AdminDashboard = () => {
   };
 
   // Handle Delete
-  const handleDelete = async (adminId) => {
+  const handleDelete = async () => {
     try {
       const getAuthHeaders = () => {
         const token = localStorage.getItem('token');
         return { headers: { Authorization: `Bearer ${token}` } };
       };
 
-      await axios.delete(`http://localhost:5000/api/delete-admin/${adminId}`, getAuthHeaders());
-      setAdmins(admins.filter((admin) => admin._id !== adminId));
+      await axios.delete(`http://localhost:5000/api/delete-admin/${adminToDelete}`, getAuthHeaders());
+      setAdmins(admins.filter((admin) => admin._id !== adminToDelete));
       setSuccess('Admin deleted successfully');
-      setError('');
+      setShowDeleteConfirmation(false);
     } catch (error) {
-      setError(error.response?.data?.error || 'Something went wrong while deleting');
+      setError('Something went wrong while deleting');
+      setShowDeleteConfirmation(false);
     }
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 p-2 bg-gray-100 min-h-screen">
+    <div className="flex flex-col lg:flex-row gap-6 p-6 bg-gray-100 min-h-screen">
       {/* Admin Form Card */}
-      <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-2 flex flex-col space-y-3">
+      <div className="w-full lg:w-1/2 bg-white shadow-lg rounded-lg p-4 flex flex-col space-y-6">
         <h2 className="text-2xl font-semibold text-gray-800">Create Admin</h2>
-        {error && <p className="text-red-500 mb-2">{error}</p>}
-        {success && <p className="text-green-500 mb-2">{success}</p>}
+        {error && <p className="text-red-500">{error}</p>}
+        {success && <p className="text-green-500">{success}</p>}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block font-medium text-gray-600">Name</label>
@@ -187,9 +163,9 @@ const AdminDashboard = () => {
               className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">Select Role</option>
-              <option value="superadmin">Super Admin</option>
               <option value="useradmin">User Admin</option>
-              <option value="marketingadmin">Marketing Admin</option>
+              <option value="approver">Approver</option>
+              <option value="subadmin">Subadmin</option>
               <option value="financeadmin">Finance Admin</option>
             </select>
           </div>
@@ -203,9 +179,9 @@ const AdminDashboard = () => {
       </div>
 
       {/* Admin List Card */}
-      <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6 max-h-[80vh] overflow-y-auto">
+      <div className="w-full lg:w-1/2 bg-white shadow-lg rounded-lg p-4 max-h-[80vh] overflow-y-auto">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Admins</h2>
-        <div className="space-y-6">
+        <div className="grid gap-4">
           {admins.length > 0 ? (
             admins.map((admin) => (
               <div key={admin._id} className="flex items-center space-x-4 p-4 border rounded-md shadow-sm">
@@ -224,7 +200,10 @@ const AdminDashboard = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(admin._id)}
+                    onClick={() => {
+                      setAdminToDelete(admin._id);
+                      setShowDeleteConfirmation(true);
+                    }}
                     className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                   >
                     Delete
@@ -237,6 +216,29 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h3 className="text-xl mb-4">Are you sure you want to delete this admin?</h3>
+            <div className="flex space-x-4">
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirmation(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

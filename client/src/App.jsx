@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { ClipLoader } from "react-spinners"; 
 import LoginPage from "./Pages/Login";
 import HomePage from "./Pages/dashboards";
 import PaymentsPage from "./Pages/Payment";
@@ -12,13 +12,28 @@ import ProfilePage from "./Pages/ProfileSettings";
 import Message from "./Pages/Messages";
 import Approval from "./Pages/Approval";
 import AdminDashboardLayout from "./Components/Navbar/Admin-layout";
-import PrivateRoute from "./Components/utils/Protectedroutes"; // Import PrivateRoute
+import PrivateRoute from "./Components/utils/Protectedroutes";
 
 const App = () => {
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    // Simulate authentication check (this can be customized based on your needs)
+    setTimeout(() => setLoading(false), 500); // Set loading state for 500ms
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={50} color="#3498db" loading={loading} />
+      </div>
+    );
+  }
+
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<LoginPage />} />
 
         {/* Protected Routes */}
@@ -39,7 +54,6 @@ const App = () => {
             path="messages"
             element={<PrivateRoute allowedRoles={['superadmin', 'financeadmin', 'useradmin', 'approver', 'subadmin']}><Message /></PrivateRoute>}
           />
-
           <Route
             path="payments"
             element={<PrivateRoute allowedRoles={['superadmin', 'financeadmin']}><PaymentsPage /></PrivateRoute>}

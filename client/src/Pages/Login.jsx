@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux"; // Import useDispatch
+import { useDispatch } from "react-redux";
 import axios from "axios";
-import { setUserRole } from "../redux/actions/authaction"; // Import setUserRole action
+import { setUserRole } from "../redux/actions/authaction";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,16 +10,23 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "", global: "" });
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);  // New loading state for token check
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      navigate("/home", { replace: true }); // Replace avoids stacking history
+      navigate("/home", { replace: true });
+    } else {
+      setInitializing(false);  // Set initializing to false after checking for token
     }
-  }, []);
-  
+  }, [navigate]);
+
+  if (initializing) {
+    return null; // Don't render anything while checking the token
+  }
+
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -35,7 +42,6 @@ const Login = () => {
     e.preventDefault();
     const newErrors = { email: "", password: "", global: "" };
 
-    // Validate input
     if (!email) {
       newErrors.email = "Please enter your email.";
     } else if (!validateEmail(email)) {
@@ -64,11 +70,9 @@ const Login = () => {
 
       const { token, role } = response.data;
 
-      // Store token in localStorage and role in Redux
-      localStorage.setItem("token", token); // Store token in localStorage (used for authenticated requests)
-      dispatch(setUserRole(role)); // Dispatch action to set user role in Redux store
+      localStorage.setItem("token", token); // Store token in localStorage
+      dispatch(setUserRole(role)); // Set role in Redux store
 
-      // Redirect to home page after login
       navigate("/home");
     } catch (err) {
       setLoading(false);

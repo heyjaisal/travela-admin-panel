@@ -1,17 +1,24 @@
+// Profile.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";  // Import useDispatch from react-redux
-import { logout } from "../redux/authSlice";  // Import logout action
+import { logout } from "../redux/actions/authaction";  // Import logout action
 
 function Profile() {
   const [activeTab, setActiveTab] = useState("approval");
 
   const navigate = useNavigate();
-  // const dispatch = useDispatch();  // Initialize dispatch to dispatch the logout action
+  const dispatch = useDispatch();  // Initialize dispatch to dispatch the logout action
 
   const handleLogout = () => {
-    // dispatch(logout());  // Dispatch the logout action to update the Redux state
-    navigate("/");  // Navigate to the home or login page
+    // Dispatch the logout action to update the Redux state
+    dispatch(logout());
+
+    // Remove token from localStorage
+    localStorage.removeItem("token");
+
+    // Navigate to the login page
+    navigate("/", { replace: true });
   };
 
   return (
