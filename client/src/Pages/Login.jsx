@@ -1,22 +1,25 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux"; // Import useDispatch
 import axios from "axios";
-import { useDispatch } from "react-redux";
-import { setRole } from "../../redux/authSlice";
+import { setUserRole } from "../redux/actions/authaction"; // Import setUserRole action
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "", global: "" });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const token = localStorage.getItem('token');
-
-  if (token) {
-    navigate('/home');
-  }
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/home", { replace: true }); // Replace avoids stacking history
+    }
+  }, []);
+  
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -32,6 +35,7 @@ const Login = () => {
     e.preventDefault();
     const newErrors = { email: "", password: "", global: "" };
 
+    // Validate input
     if (!email) {
       newErrors.email = "Please enter your email.";
     } else if (!validateEmail(email)) {
@@ -47,32 +51,30 @@ const Login = () => {
 
     setErrors(newErrors);
 
-    if (newErrors.email) {
-      document.getElementById("email").focus();
-      return;
-    }
-    if (newErrors.password) {
-      document.getElementById("password").focus();
+    if (newErrors.email || newErrors.password) {
       return;
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
+      setLoading(true);
+      const response = await axios.post("http://localhost:5000/api/login", {
         email,
         password,
       });
-  
+
       const { token, role } = response.data;
-  
-      if (token) {
-        localStorage.setItem('token', token);
-        dispatch(setRole(role)); 
-        navigate('/home');
-      }
+
+      // Store token in localStorage and role in Redux
+      localStorage.setItem("token", token); // Store token in localStorage (used for authenticated requests)
+      dispatch(setUserRole(role)); // Dispatch action to set user role in Redux store
+
+      // Redirect to home page after login
+      navigate("/home");
     } catch (err) {
+      setLoading(false);
       setErrors((prev) => ({
         ...prev,
-        global: err.response?.data?.error || 'Login failed. Please try again.',
+        global: err.response?.data?.error || "Login failed. Please try again.",
       }));
     }
   };
@@ -94,47 +96,40 @@ const Login = () => {
           </h2>
 
           {errors.global && (
-            <div
-              className="text-red-600 mb-4 text-center"
-              aria-live="assertive"
-            >
+            <div className="text-red-600 mb-4 text-center" aria-live="assertive">
               {errors.global}
             </div>
           )}
 
           <div className="mb-6">
-            <label
-              htmlFor="email"
-              className="block text-gray-600 font-medium mb-2"
-            >
+            <label htmlFor="email" className="block text-gray-600 font-medium mb-2">
               Email
             </label>
             <input
               type="text"
               id="email"
+              aria-describedby="email-error"
               placeholder="Enter your email"
               className="w-full px-4 py-2 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
             {errors.email && (
-              <div className="text-red-500 text-sm mt-1" aria-live="assertive">
+              <div id="email-error" className="text-red-500 text-sm mt-1" aria-live="assertive">
                 {errors.email}
               </div>
             )}
           </div>
 
           <div className="mb-6">
-            <label
-              htmlFor="password"
-              className="block text-gray-600 font-medium mb-2"
-            >
+            <label htmlFor="password" className="block text-gray-600 font-medium mb-2">
               Password
             </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
+                aria-describedby="password-error"
                 placeholder="Enter your password"
                 className="w-full px-4 py-2 bg-gray-100 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 value={password}
@@ -149,7 +144,7 @@ const Login = () => {
               </button>
             </div>
             {errors.password && (
-              <div className="text-red-500 text-sm mt-1" aria-live="assertive">
+              <div id="password-error" className="text-red-500 text-sm mt-1" aria-live="assertive">
                 {errors.password}
               </div>
             )}
@@ -158,21 +153,10 @@ const Login = () => {
           <button
             type="submit"
             className="w-full bg-indigo-500 text-white py-2 rounded-lg hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+            disabled={loading}
           >
-            Sign In
+            {loading ? "Loading..." : "Sign In"}
           </button>
-
-          <p className="mt-6 text-xs text-gray-500 text-center">
-            By continuing, you agree to the{' '}
-            <a href="#" className="text-indigo-500 hover:underline">
-              Terms of Use
-            </a>{' '}
-            and{' '}
-            <a href="#" className="text-indigo-500 hover:underline">
-              Privacy Policy
-            </a>
-            .
-          </p>
         </form>
       </div>
     </div>

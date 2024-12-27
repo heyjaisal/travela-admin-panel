@@ -63,13 +63,11 @@ exports.loginSuperAdmin = async (req, res) => {
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
     );
-    const dashboard = user.role === "superadmin" ? "home" : "all-users";
 
     res.status(200).json({
       message: `${user.role} logged in successfully.`,
       token,
       role: user.role,  
-      dashboard,
     });
   } catch (error) {
     console.error("Error during Super Admin login:", error);

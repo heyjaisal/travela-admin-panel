@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";  // Import useDispatch from react-redux
+import { logout } from "../redux/authSlice";  // Import logout action
 
 function Profile() {
   const [activeTab, setActiveTab] = useState("approval");
 
   const navigate = useNavigate();
-  const token = localStorage.getItem('token')
-  const logout = () => {
-    localStorage.removeItem("token");
-    navigate('/')
+  // const dispatch = useDispatch();  // Initialize dispatch to dispatch the logout action
+
+  const handleLogout = () => {
+    // dispatch(logout());  // Dispatch the logout action to update the Redux state
+    navigate("/");  // Navigate to the home or login page
   };
-  useEffect(() => {
-    if (!token) {
-      navigate("/");
-    }
-  }, [navigate, token]);
+
   return (
     <div>
       <div className="container">
@@ -23,8 +22,7 @@ function Profile() {
           <input
             type="text"
             placeholder="Search"
-            className="py-2 my-2 mr-3 px-1 rounded-lg
-         text-center border border-gray-300 w-48"
+            className="py-2 my-2 mr-3 px-1 rounded-lg text-center border border-gray-300 w-48"
           />
         </div>
         <div className="flex border-b border-gray-300 mb-4">
@@ -36,7 +34,6 @@ function Profile() {
                 : "border-transparent text-gray-600"
             }`}
           >
-            {" "}
             Profile
           </button>
           <button
@@ -52,11 +49,12 @@ function Profile() {
         </div>
       </div>
       <div>
-        <button onClick={logout} className="p-4 m-5 bg-red-600 text-white">
-          logout
+        <button onClick={handleLogout} className="p-4 m-5 bg-red-600 text-white">
+          Logout
         </button>
       </div>
     </div>
   );
 }
+
 export default Profile;

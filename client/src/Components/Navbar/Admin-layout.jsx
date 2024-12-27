@@ -1,24 +1,10 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { Navigate, Outlet } from "react-router-dom";
-import AdminNavbar from "./Admin-navbar"; 
+import { Outlet } from "react-router-dom";
+import AdminNavbar from "./Admin-navbar";
+import { useSelector } from "react-redux"; // Use Redux to get role
 
 const AdminDashboardLayout = () => {
-  const { role, isAuthenticated } = useSelector((state) => state.auth);
-
-
-  if (!isAuthenticated) {
-    return <Navigate to="/" />;
-  }
-
-  if (
-    role !== "superadmin" &&
-    role !== "useradmin" &&
-    role !== "marketingadmin" &&
-    role !== "financeadmin"
-  ) {
-    return <Navigate to="/profile" />;
-  }
+  const role = useSelector((state) => state.auth.role); // Access role from Redux
 
   return (
     <div className="flex h-screen">

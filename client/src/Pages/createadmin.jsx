@@ -34,41 +34,42 @@ const AdminDashboard = () => {
     setError('');
     setSuccess('');
 
-    if (!formData.name ) {
-      setError('name is required');
+    if (!formData.name) {
+      setError('Name is required');
       return;
     }
 
-    if ( !formData.email ) {
-      setError('email is required');
+    if (!formData.email) {
+      setError('Email is required');
       return;
     }
 
-    if ( !formData.password ) {
-      setError('password is required');
-      return;
-    }
-    if ( !formData.position ) {
-      setError('postion is required');
-      return;
-    } 
-    if ( !formData.mobile ) {
-      setError('mobile number is required');
-      return;
-    }
-    if ( !formData.role ) {
-      setError('role is required');
+    if (!formData.password) {
+      setError('Password is required');
       return;
     }
 
+    if (!formData.position) {
+      setError('Position is required');
+      return;
+    }
+
+    if (!formData.mobile) {
+      setError('Mobile number is required');
+      return;
+    }
+
+    if (!formData.role) {
+      setError('Role is required');
+      return;
+    }
 
     try {
       const getAuthHeaders = () => {
-        const token = localStorage.getItem("token");
-        return {
-          headers: { Authorization: `Bearer ${token}` },
-        };
+        const token = localStorage.getItem('token');
+        return { headers: { Authorization: `Bearer ${token}` } };
       };
+
       const response = await axios.post('http://localhost:5000/api/create-admin', formData, getAuthHeaders());
       setAdmins([...admins, response.data.admin]);
       setSuccess('Admin created successfully');
@@ -76,7 +77,7 @@ const AdminDashboard = () => {
         name: '',
         email: '',
         password: '',
-        role: '', 
+        role: '',
         position: '',
         mobile: '',
       });
@@ -106,11 +107,10 @@ const AdminDashboard = () => {
   const handleDelete = async (adminId) => {
     try {
       const getAuthHeaders = () => {
-        const token = localStorage.getItem("token");
-        return {
-          headers: { Authorization: `Bearer ${token}` },
-        };
+        const token = localStorage.getItem('token');
+        return { headers: { Authorization: `Bearer ${token}` } };
       };
+
       await axios.delete(`http://localhost:5000/api/delete-admin/${adminId}`, getAuthHeaders());
       setAdmins(admins.filter((admin) => admin._id !== adminId));
       setSuccess('Admin deleted successfully');
@@ -121,76 +121,81 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 p-2">
+    <div className="flex flex-col md:flex-row gap-6 p-2 bg-gray-100 min-h-screen">
       {/* Admin Form Card */}
-      <div className="w-full md:w-1/2 bg-white shadow-md rounded-lg p-2">
-        <h2 className="text-xl font-bold mb-4">Create Admin</h2>
+      <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-2 flex flex-col space-y-3">
+        <h2 className="text-2xl font-semibold text-gray-800">Create Admin</h2>
         {error && <p className="text-red-500 mb-2">{error}</p>}
         {success && <p className="text-green-500 mb-2">{success}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block font-medium">Name</label>
+            <label className="block font-medium text-gray-600">Name</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
-            <label className="block font-medium">Email</label>
+            <label className="block font-medium text-gray-600">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
-            <label className="block font-medium">Password</label>
+            <label className="block font-medium text-gray-600">Password</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
-            <label className="block font-medium">Position</label>
+            <label className="block font-medium text-gray-600">Position</label>
             <input
               type="text"
               name="position"
               value={formData.position}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
-            <label className="block font-medium">Mobile</label>
+            <label className="block font-medium text-gray-600">Mobile</label>
             <input
               type="text"
               name="mobile"
               value={formData.mobile}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
-            <label className="block font-medium">Role</label>
-            <input
-              type="text"
+            <label className="block font-medium text-gray-600">Role</label>
+            <select
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
-            />
+              className="w-full border border-gray-300 rounded-md px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Select Role</option>
+              <option value="superadmin">Super Admin</option>
+              <option value="useradmin">User Admin</option>
+              <option value="marketingadmin">Marketing Admin</option>
+              <option value="financeadmin">Finance Admin</option>
+            </select>
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white rounded px-3 py-2 hover:bg-blue-600"
+            className="w-full bg-indigo-600 text-white rounded-md px-4 py-2 hover:bg-indigo-700"
           >
             Create Admin
           </button>
@@ -198,29 +203,29 @@ const AdminDashboard = () => {
       </div>
 
       {/* Admin List Card */}
-      <div className="w-full md:w-1/2 bg-white shadow-md rounded-lg p-2">
-        <h2 className="text-xl font-bold mb-4">Admins</h2>
-        <div className="space-y-4">
-          {admins && admins.length > 0 ? (
+      <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-6 max-h-[80vh] overflow-y-auto">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Admins</h2>
+        <div className="space-y-6">
+          {admins.length > 0 ? (
             admins.map((admin) => (
-              <div key={admin._id} className="flex items-center space-x-4 p-3 border rounded">
-                <div>
-                  <p className="text-lg font-bold">{admin.name}</p>
+              <div key={admin._id} className="flex items-center space-x-4 p-4 border rounded-md shadow-sm">
+                <div className="flex-1">
+                  <p className="text-lg font-semibold text-gray-800">{admin.name}</p>
                   <p className="text-sm text-gray-500">{admin.role}</p>
                   <p className="text-sm text-gray-500">{admin.position}</p>
-                  <p className="text-sm text-gray-500">{admin.personalEmail}</p>
+                  <p className="text-sm text-gray-500">{admin.email}</p>
                   <p className="text-sm text-gray-500">{admin.mobile}</p>
                 </div>
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleEdit(admin)}
-                    className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600"
+                    className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(admin._id)}
-                    className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
+                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                   >
                     Delete
                   </button>

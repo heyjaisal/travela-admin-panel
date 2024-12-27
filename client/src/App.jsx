@@ -1,112 +1,69 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./Pages/Login/Login";
+import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
+import { useSelector } from "react-redux";
+import LoginPage from "./Pages/Login";
+import HomePage from "./Pages/dashboards";
+import PaymentsPage from "./Pages/Payment";
+import UsersPage from "./Pages/Allusers";
+import RequestsPage from "./Pages/Request";
+import NotificationsPage from "./Pages/Notification";
+import Create from "./Pages/createadmin";
+import ProfilePage from "./Pages/ProfileSettings";
+import Message from "./Pages/Messages";
+import Approval from "./Pages/Approval";
 import AdminDashboardLayout from "./Components/Navbar/Admin-layout";
-import AllUsers from "./Pages/Admin/AllUsers";
-import AdminPayments from "./Pages/Admin/Payment";
-import AdminRequests from "./Pages/Admin/Payment";
-import AdminNotifications from "./Pages/Admin/Notification";
-import AdminMessages from "./Pages/Admin/Messages";
-import AdminCreate from "./Pages/Admin/Create";
-import AdminApproval from "./Pages/Admin/Approval";
-import AdminProfileSettings from "./Pages/Admin/ProfileSettings";
-import Dashboard from "./Pages/Admin/Dashboard";
-import RoleBasedRoute from "./Components/utils/Protectedroutes"; 
+import PrivateRoute from "./Components/utils/Protectedroutes"; // Import PrivateRoute
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        
-        <Route path="/" element={<Login />} />
+        {/* Public Routes */}
+        <Route path="/" element={<LoginPage />} />
 
-        <Route element={<AdminDashboardLayout />}>
+        {/* Protected Routes */}
+        <Route path="/" element={<AdminDashboardLayout />}>
           <Route
-            path="/home"
-            element={
-              <RoleBasedRoute allowedRoles={["superadmin", "marketingadmin"]}>
-                <Dashboard />
-              </RoleBasedRoute>
-            }
+            path="home"
+            element={<PrivateRoute allowedRoles={['superadmin', 'financeadmin', 'useradmin', 'approver', 'subadmin']}><HomePage /></PrivateRoute>}
           />
           <Route
-            path="/all-users"
-            element={
-              <RoleBasedRoute allowedRoles={["superadmin", "useradmin"]}>
-                <AllUsers />
-              </RoleBasedRoute>
-            }
+            path="notifications"
+            element={<PrivateRoute allowedRoles={['superadmin', 'financeadmin', 'useradmin', 'approver', 'subadmin']}><NotificationsPage /></PrivateRoute>}
           />
           <Route
-            path="/payments"
-            element={
-              <RoleBasedRoute allowedRoles={["superadmin", "financeadmin"]}>
-                <AdminPayments />
-              </RoleBasedRoute>
-            }
+            path="profile"
+            element={<PrivateRoute allowedRoles={['superadmin', 'financeadmin', 'useradmin', 'approver', 'subadmin']}><ProfilePage /></PrivateRoute>}
           />
           <Route
-            path="/requests"
-            element={
-              <RoleBasedRoute allowedRoles={["superadmin", "useradmin"]}>
-                <AdminRequests />
-              </RoleBasedRoute>
-            }
+            path="messages"
+            element={<PrivateRoute allowedRoles={['superadmin', 'financeadmin', 'useradmin', 'approver', 'subadmin']}><Message /></PrivateRoute>}
+          />
+
+          <Route
+            path="payments"
+            element={<PrivateRoute allowedRoles={['superadmin', 'financeadmin']}><PaymentsPage /></PrivateRoute>}
           />
           <Route
-            path="/notifications"
-            element={
-              <RoleBasedRoute
-                allowedRoles={["superadmin", "marketingadmin", "useradmin",'financeadmin']}
-              >
-                <AdminNotifications />
-              </RoleBasedRoute>
-            }
+            path="all-users"
+            element={<PrivateRoute allowedRoles={['superadmin', 'useradmin', 'approver', 'subadmin']}><UsersPage /></PrivateRoute>}
           />
           <Route
-            path="/messages"
-            element={
-              <RoleBasedRoute
-                allowedRoles={["superadmin", "financeadmin", "useradmin",'marketingadmin']}
-              >
-                <AdminMessages />
-              </RoleBasedRoute>
-            }
+            path="requests"
+            element={<PrivateRoute allowedRoles={['superadmin', 'useradmin', 'approver', 'subadmin']}><RequestsPage /></PrivateRoute>}
           />
           <Route
-            path="/create"
-            element={
-              <RoleBasedRoute allowedRoles={["superadmin"]}>
-                <AdminCreate />
-              </RoleBasedRoute>
-            }
+            path="approval"
+            element={<PrivateRoute allowedRoles={['superadmin', 'approver']}><Approval /></PrivateRoute>}
           />
           <Route
-            path="/approval"
-            element={
-              <RoleBasedRoute allowedRoles={["superadmin", "useradmin"]}>
-                <AdminApproval />
-              </RoleBasedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <RoleBasedRoute
-                allowedRoles={[
-                  "superadmin",
-                  "useradmin",
-                  "marketingadmin",
-                  "financeadmin",
-                ]}
-              >
-                <AdminProfileSettings />
-              </RoleBasedRoute>
-            }
+            path="create"
+            element={<PrivateRoute allowedRoles={['superadmin']}><Create /></PrivateRoute>}
           />
         </Route>
 
-        <Route path="*" element={<Login />} />
+        {/* Fallback for Unauthorized Access */}
+        <Route path="*" element={<LoginPage />} />
       </Routes>
     </Router>
   );
