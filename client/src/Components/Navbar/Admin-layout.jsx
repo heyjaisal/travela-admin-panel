@@ -1,10 +1,10 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import AdminNavbar from "./Admin-navbar";
-import { useSelector } from "react-redux"; // Use Redux to get role
+import { useSelector } from "react-redux"; 
 
 const AdminDashboardLayout = () => {
-  const role = useSelector((state) => state.auth.role); // Access role from Redux
+  const role = useSelector((state) => state.auth.role); 
 
   return (
     <div className="flex h-screen">

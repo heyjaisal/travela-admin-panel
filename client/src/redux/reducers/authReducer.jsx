@@ -1,8 +1,7 @@
-// authReducer.js
 import { SET_USER_ROLE, LOGOUT } from '../actions/authaction';
 
 const initialState = {
-  role: null,  // Initially, no role is set
+  role: null,  
 };
 
 const authReducer = (state = initialState, action) => {
@@ -12,10 +11,10 @@ const authReducer = (state = initialState, action) => {
         ...state,
         role: action.payload,
       };
-    case LOGOUT:  // Handle the logout action
+    case LOGOUT:  
       return {
         ...state,
-        role: null,  // Reset the role to null
+        role: null,  
       };
     default:
       return state;

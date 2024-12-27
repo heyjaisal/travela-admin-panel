@@ -16,7 +16,6 @@ import {
 } from "react-icons/fa";
 
 const AdminNavbar = () => {
-  // Access the role from Redux state
   const role = useSelector((state) => state.auth.role); 
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -24,12 +23,8 @@ const AdminNavbar = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
 
-  // Check for specific roles
-  const isFinanceAdmin = role === "financeadmin";
-  const isSuperAdmin = role === "superadmin";
-  const isUserAdmin = role === "useradmin";
-  const isApprover = role === "approver";
-  const isSubadmin = role === "subadmin";
+  // Helper function to check access based on role
+  const hasAccess = (roles) => roles.includes(role);
 
   return (
     <>
@@ -50,8 +45,8 @@ const AdminNavbar = () => {
             Home
           </NavLink>
 
-          {/* All Users link (accessible by SuperAdmin, UserAdmin, Approver, Subadmin) */}
-          {(isSuperAdmin || isUserAdmin || isApprover || isSubadmin) && (
+          {/* Role-based links */}
+          {hasAccess(["superadmin", "useradmin", "approver", "subadmin"]) && (
             <NavLink
               to="/all-users"
               className={({ isActive }) =>
@@ -63,8 +58,7 @@ const AdminNavbar = () => {
             </NavLink>
           )}
 
-          {/* Payments link (accessible by SuperAdmin and FinanceAdmin) */}
-          {(isSuperAdmin || isFinanceAdmin) && (
+          {hasAccess(["superadmin", "financeadmin"]) && (
             <NavLink
               to="/payments"
               className={({ isActive }) =>
@@ -76,8 +70,7 @@ const AdminNavbar = () => {
             </NavLink>
           )}
 
-          {/* Requests link (accessible by SuperAdmin and UserAdmin) */}
-          {(isSuperAdmin || isUserAdmin) && (
+          {hasAccess(["superadmin", "useradmin"]) && (
             <NavLink
               to="/requests"
               className={({ isActive }) =>
@@ -89,8 +82,7 @@ const AdminNavbar = () => {
             </NavLink>
           )}
 
-          {/* Approval link (accessible by SuperAdmin and Approver) */}
-          {(isSuperAdmin || isApprover) && (
+          {hasAccess(["superadmin", "approver"]) && (
             <NavLink
               to="/approval"
               className={({ isActive }) =>
@@ -102,8 +94,7 @@ const AdminNavbar = () => {
             </NavLink>
           )}
 
-          {/* Create link (only accessible by SuperAdmin and Subadmin) */}
-          {(isSuperAdmin) && (
+          {hasAccess(["superadmin", "subadmin"]) && (
             <NavLink
               to="/create"
               className={({ isActive }) =>
@@ -115,7 +106,7 @@ const AdminNavbar = () => {
             </NavLink>
           )}
 
-          {/* Notifications link (accessible by all admins) */}
+          {/* Common links */}
           <NavLink
             to="/notifications"
             className={({ isActive }) =>
@@ -126,7 +117,6 @@ const AdminNavbar = () => {
             Notifications
           </NavLink>
 
-          {/* Messages link (accessible by all admins) */}
           <NavLink
             to="/messages"
             className={({ isActive }) =>
@@ -137,7 +127,6 @@ const AdminNavbar = () => {
             Messages
           </NavLink>
 
-          {/* Profile link (accessible by all admins) */}
           <NavLink
             to="/profile"
             className={({ isActive }) =>
@@ -158,7 +147,7 @@ const AdminNavbar = () => {
             <span className="text-xs">Menu</span>
           </button>
 
-          {/* Repeated Mobile Links with Role-Based Visibility */}
+          {/* Mobile links */}
           <NavLink
             to="/home"
             className={({ isActive }) =>
@@ -169,7 +158,7 @@ const AdminNavbar = () => {
             <span className="text-xs">Home</span>
           </NavLink>
 
-          {(isSuperAdmin || isFinanceAdmin) && (
+          {hasAccess(["superadmin", "financeadmin"]) && (
             <NavLink
               to="/payments"
               className={({ isActive }) =>
@@ -212,7 +201,6 @@ const AdminNavbar = () => {
               <h1 className="text-2xl font-bold">Admin Dashboard</h1>
             </div>
             <nav className="flex-1 p-4 space-y-4">
-              {/* Same links for sidebar with role-based access */}
               <NavLink
                 to="/home"
                 onClick={closeSidebar}
@@ -224,7 +212,7 @@ const AdminNavbar = () => {
                 Home
               </NavLink>
 
-              {(isSuperAdmin || isUserAdmin || isApprover || isSubadmin) && (
+              {hasAccess(["superadmin", "useradmin", "approver", "subadmin"]) && (
                 <NavLink
                   to="/all-users"
                   onClick={closeSidebar}
@@ -237,7 +225,7 @@ const AdminNavbar = () => {
                 </NavLink>
               )}
 
-              {(isSuperAdmin || isFinanceAdmin) && (
+              {hasAccess(["superadmin", "financeadmin"]) && (
                 <NavLink
                   to="/payments"
                   onClick={closeSidebar}
@@ -250,7 +238,7 @@ const AdminNavbar = () => {
                 </NavLink>
               )}
 
-              {(isSuperAdmin || isUserAdmin) && (
+              {hasAccess(["superadmin", "useradmin"]) && (
                 <NavLink
                   to="/requests"
                   onClick={closeSidebar}
@@ -263,7 +251,7 @@ const AdminNavbar = () => {
                 </NavLink>
               )}
 
-              {(isSuperAdmin || isApprover) && (
+              {hasAccess(["superadmin", "approver"]) && (
                 <NavLink
                   to="/approval"
                   onClick={closeSidebar}
@@ -276,7 +264,7 @@ const AdminNavbar = () => {
                 </NavLink>
               )}
 
-              {(isSuperAdmin || isSubadmin) && (
+              {hasAccess(["superadmin", "subadmin"]) && (
                 <NavLink
                   to="/create"
                   onClick={closeSidebar}
@@ -288,26 +276,28 @@ const AdminNavbar = () => {
                   Create
                 </NavLink>
               )}
-              <NavLink
-            to="/notifications"
-            className={({ isActive }) =>
-              `flex items-center gap-4 p-3 rounded-xl ${isActive ? "bg-blue-600 text-white" : ""}`
-            }
-          >
-            <FaBell />
-            Notifications
-          </NavLink>
 
-          {/* Messages link (accessible by all admins) */}
-          <NavLink
-            to="/messages"
-            className={({ isActive }) =>
-              `flex items-center gap-4 p-3 rounded-xl ${isActive ? "bg-blue-600 text-white" : ""}`
-            }
-          >
-            <FaEnvelope />
-            Messages
-          </NavLink>
+              <NavLink
+                to="/notifications"
+                onClick={closeSidebar}
+                className={({ isActive }) =>
+                  `flex items-center gap-4 p-3 rounded-xl ${isActive ? "bg-blue-600 text-white" : ""}`
+                }
+              >
+                <FaBell />
+                Notifications
+              </NavLink>
+
+              <NavLink
+                to="/messages"
+                onClick={closeSidebar}
+                className={({ isActive }) =>
+                  `flex items-center gap-4 p-3 rounded-xl ${isActive ? "bg-blue-600 text-white" : ""}`
+                }
+              >
+                <FaEnvelope />
+                Messages
+              </NavLink>
 
               <NavLink
                 to="/profile"

@@ -1,8 +1,7 @@
-// redux/store.jsx
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './reducers/authReducer';
 import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // Local storage for persistence
+import storage from 'redux-persist/lib/storage';
 
 const persistConfig = {
   key: 'root',
@@ -13,10 +12,9 @@ const persistedReducer = persistReducer(persistConfig, authReducer);
 
 const store = configureStore({
   reducer: {
-    auth: persistedReducer, // Use persisted reducer
+    auth: persistedReducer,
   },
 });
 
-const persistor = persistStore(store); // Create persistor
-
+const persistor = persistStore(store);
 export { store, persistor };

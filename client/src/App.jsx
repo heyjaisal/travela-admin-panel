@@ -19,8 +19,7 @@ const App = () => {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    // Simulate authentication check (this can be customized based on your needs)
-    setTimeout(() => setLoading(false), 500); // Set loading state for 500ms
+    setTimeout(() => setLoading(false), 500); 
   }, []);
 
   if (loading) {

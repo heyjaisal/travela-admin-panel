@@ -1,7 +1,5 @@
-// authaction.js
-
 export const SET_USER_ROLE = 'SET_USER_ROLE';
-export const LOGOUT = 'LOGOUT';  // Add logout action type
+export const LOGOUT = 'LOGOUT';
 
 export const setUserRole = (role) => {
   return {
@@ -12,6 +10,6 @@ export const setUserRole = (role) => {
 
 export const logout = () => {
   return {
-    type: LOGOUT,  // Action type for logout
+    type: LOGOUT,
   };
 };
