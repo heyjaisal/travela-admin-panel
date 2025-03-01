@@ -8,7 +8,7 @@ import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import logo from "../assets/logo.png";
-import { addToast } from "@heroui/react"; // Import addToast
+import { toast, ToastContainer } from "react-toastify";
 
 const LoginForm = ({ className, ...props }) => {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ const LoginForm = ({ className, ...props }) => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // Add loading state
 
   const validate = () => {
     let errors = {};
@@ -33,6 +34,7 @@ const LoginForm = ({ className, ...props }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (validate()) {
+      setLoading(true); // Set loading to true
       try {
         const response = await axios.post(
           "http://localhost:5000/api/admin/auth/login",
@@ -48,14 +50,11 @@ const LoginForm = ({ className, ...props }) => {
 
           navigate("/home");
         }
-      } catch (err) {
-  
-        const errorMessage = err?.response?.data?.message || "Login failed. Please try again.";
-
-        addToast({
-          title: errorMessage,
-          color: "red",
-        });
+      } catch (error) {
+        const errorMessage = error?.response?.data?.message || "Login failed. Please try again.";
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false); // Reset loading state
       }
     }
   };
@@ -91,8 +90,27 @@ const LoginForm = ({ className, ...props }) => {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <Button type="submit" className="w-full">Login</Button>
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? (
+            <svg
+              className="animate-spin h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v2a6 6 0 100 12v2a8 8 0 01-8-8z"
+              />
+            </svg>
+          ) : (
+            "Login"
+          )}
+        </Button>
       </div>
+      <ToastContainer />
     </form>
   );
 };

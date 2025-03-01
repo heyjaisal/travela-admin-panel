@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 const Admin = require("../models/admin");
 const User = require("../models/user");
 const Host = require("../models/host");
+const { all } = require("../routes/auth.routes");
 require("dotenv").config();
 
 exports.superAdmin = async (req, res) => {
@@ -24,11 +25,11 @@ exports.superAdmin = async (req, res) => {
 
     const newAdmin = new Admin({
       email,
-      password: hashedPassword, 
+      password: hashedPassword,
       name,
       age,
       mobile,
-      position, 
+      position,
       role,
       isSuperAdmin,
       allowedPages: allowedPages || [
@@ -223,9 +224,9 @@ exports.createUser = async (req, res) => {
       email,
       age,
       country,
-      password:hashedPassword
+      password: hashedPassword,
     });
-    await newUser.save()
+    await newUser.save();
 
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -255,19 +256,18 @@ The Team`,
 
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({message:'user created succesfully'})
+    res.status(200).json({ message: "user created succesfully" });
   } catch (error) {
-    res.status(500).json({message:'Internal server error',error})
-    console.log("failed creating user",error);
+    res.status(500).json({ message: "Internal server error", error });
+    console.log("failed creating user", error);
   }
 };
 
-exports.createHost = async (req,res)=>{
-   
-  const { password, username, email, age, country,phone } = req.body;
+exports.createHost = async (req, res) => {
+  const { password, username, email, age, country, phone } = req.body;
 
   try {
-    if (!password || !username || !email || !age || !country||!phone) {
+    if (!password || !username || !email || !age || !country || !phone) {
       return res.status(403).json({ message: "all feilds are required" });
     }
 
@@ -297,9 +297,9 @@ exports.createHost = async (req,res)=>{
       age,
       country,
       phone,
-      password:hashedPassword
+      password: hashedPassword,
     });
-    await newUser.save()
+    await newUser.save();
 
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -329,40 +329,77 @@ The Team`,
 
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({message:'user created succesfully'})
+    res.status(200).json({ message: "user created succesfully" });
   } catch (error) {
-    res.status(500).json({message:'Internal server error',error})
-    console.log("failed creating user",error);
+    res.status(500).json({ message: "Internal server error", error });
+    console.log("failed creating user", error);
   }
-}
+};
 
 exports.restrictUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { type } = req.body; 
+    const { type } = req.body;
 
     let Model;
-    if (type === 'host') {
-      Model = Host; 
-    } else if (type === 'user') {
-      Model = User; 
-    } else if (type === 'admin') {
+    if (type === "host") {
+      Model = Host;
+    } else if (type === "user") {
+      Model = User;
+    } else if (type === "admin") {
       Model = Admin;
     } else {
-      return res.status(400).json({ message: 'Invalid user type' });
+      return res.status(400).json({ message: "Invalid user type" });
     }
 
     const user = await Model.findById(id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    user.status = user.status === 'Restricted' ? 'active' : 'Restricted';
+    user.status = user.status === "Restricted" ? "active" : "Restricted";
     await user.save();
 
     res.status(200).json(user);
   } catch (error) {
-    console.error('Error toggling user restriction:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error toggling user restriction:", error);
+    res.status(500).json({ message: "Server error",error });
+  }
+};
+
+exports.updateAdmin = async (req, res) => {
+  const { id } = req.params;
+  const { name, email, role, age, mobile, position, allowedPages } = req.body;
+  try {
+    if (
+      !name ||
+      !email ||
+      !role ||
+      !age ||
+      !mobile ||
+      !position ||
+      !allowedPages
+    ) {
+      return res.status(403).json({ message: "all feilds are required" });
+    }
+    const admin = await Admin.findById(id);
+
+    if (!admin) {
+      res.status(403).json({ message: "No admin found" });
+    }
+
+    admin.name = name || admin.name;
+    admin.email = email || admin.email;
+    admin.role = role || admin.role;
+    admin.age = age || admin.age;
+    admin.mobile = mobile || admin.mobile;
+    admin.position = position || admin.position;
+    admin.allowedPages = allowedPages || admin.allowedPages;
+
+    admin.save()
+
+    res.status(200).json({message:'Admin updated succesfully'})
+  } catch (error) {
+    res.status(500).json({message:'Failed to updated Admin',error})
   }
 };

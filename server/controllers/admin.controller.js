@@ -18,13 +18,13 @@ exports.AdminData = async (req, res) => {
     } });
   } catch (error) {
     console.error("Error fetching admin data:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error",error });
   }
 };
 
 exports.Getadmin = async (req, res) => {
   try {
-    const admins = await Admin.find({ isSuperAdmin: false },"_id name age position email mobile status");
+    const admins = await Admin.find({ isSuperAdmin: false },"_id name age position email mobile status allowedPages role");
     res.status(200).json(admins);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching admins', error });
@@ -37,7 +37,7 @@ exports.Getusers = async (req, res) => {
     res.status(200).json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error',error  });
   }
 };
 
@@ -48,7 +48,7 @@ exports.Gethosts = async (req, res) => {
     res.status(200).json(hosts);
   } catch (error) {
     console.error('Error fetching hosts:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error',error  });
   }
 }
 
@@ -77,6 +77,6 @@ exports.createSuperAdmin = async (req, res) => {
     res.status(201).send("Super Admin created successfully.");
   } catch (error) {
     console.error("Error creating Super Admin:", error);
-    res.status(500).send("Internal server error.");
+    res.status(500).send({message: "Internal server error",error });
   }
 };
