@@ -22,4 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-trash.js
+
+
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+bun.lockb
