@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../utils/axios-instance";
 import {
   Table,
   TableHeader,
@@ -26,6 +26,7 @@ import {
 import { PlusIcon } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import ToggleUser from "@/utils/Restrict";
+import { useNavigate } from "react-router-dom";
 
 export const columns = [
   { name: "USERNAME", uid: "username", sortable: false },
@@ -61,6 +62,7 @@ export default function Allusers() {
   );
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [page, setPage] = React.useState(1);
+  const navigate = useNavigate()
   const [users, setUsers] = React.useState([]);
   const [newUser , setNewUser ] = React.useState({
     password: "",
@@ -72,11 +74,11 @@ export default function Allusers() {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:5000/api/admin/all-users",
+      const response = await axiosInstance.get(
+        "/admin/all-users",
         { withCredentials: true }
       );
-      console.log(response.data);
+   
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -100,11 +102,11 @@ export default function Allusers() {
 
   const handleAddUser  = async () => {
     try {
-      await axios.post("http://localhost:5000/api/admin/auth/add-user", newUser , { withCredentials: true });
+      await axiosInstance.post("/admin/auth/add-user", newUser , { withCredentials: true });
       setNewUser ({ password: '', username: '', email: '', age: '', country: '' });
       onOpenChange(false);
 
-      const response = await axios.get('http://localhost:5000/api/admin/all-users', { withCredentials: true });
+      const response = await axiosInstance.get('/admin/all-users', { withCredentials: true });
       setUsers(response.data);
 
       toast.success('User  created successfully');
@@ -124,7 +126,7 @@ export default function Allusers() {
           <User     
             avatarProps={{
               radius: "lg",
-              src: user.avatar || undefined,
+              src: user.image || undefined,
               fallback: user.username.charAt(0).toUpperCase(),
             }}
             description={user.email}
@@ -160,7 +162,7 @@ export default function Allusers() {
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu>
-                  <DropdownItem key="view">View</DropdownItem>
+                <DropdownItem key="view" onClick={()=>navigate(`/all-users/user/${user._id}`)}>View</DropdownItem>
                   <DropdownItem key="suspend">Suspend</DropdownItem>
                   <DropdownItem key="restrict">
                   <ToggleUser  userId={user._id} userType="user" currentStatus={user.status} onSuccess={fetchUsers} />

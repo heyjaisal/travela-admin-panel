@@ -1,11 +1,11 @@
 import React from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axios-instance';
 import { toast } from 'react-toastify';
 
 const ToggleUser = ({ userId, userType, currentStatus, onSuccess }) => {
   const handleToggleUser = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/auth/change-restrict/${userId}`, { type: userType }, { withCredentials: true });
+      await axiosInstance.put(`/admin/auth/change-restrict/${userId}`, { type: userType }, { withCredentials: true });
       
       
       if (onSuccess) {

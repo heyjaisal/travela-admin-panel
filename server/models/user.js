@@ -13,11 +13,11 @@ const userSchema = new mongoose.Schema(
     lastName: { type: String, trim: true },
     image: { type: String, default: null },
     profileSetup: { type: Boolean, default: false },
-    status:{type:String,enum:['active','inactive','Restricted'],default:'active'},
+    status: { type: String, enum: ["active", "inactive", "Restricted"], default: "active" },
     city: { type: String, trim: true },
     gender: { type: String, enum: ["male", "female"] },
-    isResticted:{type:Boolean,default:false},
-    
+    isRestricted: { type: Boolean, default: false },
+
     blogs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Blog" }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

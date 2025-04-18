@@ -13,6 +13,7 @@ exports.AdminData = async (req, res) => {
       id: admin._id, 
       name: admin.name, 
       email: admin.email, 
+      image :admin.image,
       role: admin.role, 
       allowedPages: admin.allowedPages
     } });
@@ -24,7 +25,7 @@ exports.AdminData = async (req, res) => {
 
 exports.Getadmin = async (req, res) => {
   try {
-    const admins = await Admin.find({ isSuperAdmin: false },"_id name age position email mobile status allowedPages role");
+    const admins = await Admin.find({ isSuperAdmin: false },"_id name age position email mobile status allowedPages role firstName lastName");
     res.status(200).json(admins);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching admins', error });
@@ -54,7 +55,7 @@ exports.Gethosts = async (req, res) => {
 
 exports.createSuperAdmin = async (req, res) => {
   const { name, email, password, role, position } = req.body;
-  console.log(name);
+  
 
   try {
     const existingSuperAdmin = await Admin.findOne({ role: "superadmin" });

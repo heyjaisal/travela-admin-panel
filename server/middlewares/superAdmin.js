@@ -27,7 +27,6 @@ const isSuperAdmin = async (req, res, next) => {
       return res.status(403).json({ message: "Require Super Admin Role!" });
     }
 
-    // If everything is fine, proceed to the next middleware
     next();
   } catch (error) {
     console.error("Authorization error:", error);

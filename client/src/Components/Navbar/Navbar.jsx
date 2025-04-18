@@ -21,11 +21,9 @@ import logo from "../../assets/logo.png";
 
 const allRoutes = [
   { to: "/home", icon: Home, text: "Home", permission: "home" },
-  { to: "/messages", icon: MessagesSquare, text: "Messages", permission: "messages" },
   { to: "/create", icon: Plus, text: "Create", permission: "create" },
   { to: "/payments", icon: Wallet, text: "Payments", permission: "payments" },
   { to: "/all-users", icon: ClipboardList, text: "All Users", permission: "all-users" },
-  { to: "/requests", icon: FileText, text: "Requests", permission: "requests" },
   { to: "/approval", icon: CalendarDays, text: "Approval", permission: "approval" },
   { to: "/notifications", icon: Bell, text: "Notifications", permission: "notifications" },
   { to: "/profile", icon: User, text: "Profile", permission: "profile" },

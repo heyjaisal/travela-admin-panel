@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../utils/axios-instance";
 import {
   Table,
   TableHeader,
@@ -24,15 +24,16 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import { PlusIcon } from "lucide-react";
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
 import ToggleUser from "@/utils/Restrict";
+import { useNavigate } from "react-router-dom";
 
 export const columns = [
   { name: "USERNAME", uid: "username", sortable: false },
   { name: "AGE", uid: "age", sortable: false },
   { name: "country", uid: "country", sortable: false },
   { name: "EMAIL", uid: "email" },
-  { name: "phone", uid: "phone" }, 
+  { name: "phone", uid: "phone" },
   { name: "STATUS", uid: "status", sortable: true },
   { name: "ACTIONS", uid: "actions" },
 ];
@@ -43,61 +44,85 @@ const statusColorMap = {
   restricted: "warning",
 };
 
-const INITIAL_VISIBLE_COLUMNS = ["username", "country", "phone", "status", "actions"];
+const INITIAL_VISIBLE_COLUMNS = [
+  "username",
+  "country",
+  "phone",
+  "status",
+  "actions",
+];
 
 export default function App() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [filterValue, setFilterValue] = React.useState("");
-  const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS));
+  const [visibleColumns, setVisibleColumns] = React.useState(
+    new Set(INITIAL_VISIBLE_COLUMNS)
+  );
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
   const [Hosts, setHosts] = React.useState([]);
-  const [newUser  , setNewUser  ] = React.useState({
+  const [newUser, setNewUser] = React.useState({
     password: "",
     username: "",
     email: "",
     country: "",
     age: "",
-    phone: "", 
+    phone: "",
   });
   const fetchHosts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/all-hosts', { withCredentials: true });
+      const response = await axiosInstance.get("/admin/all-hosts", {
+        withCredentials: true,
+      });
       setHosts(response.data);
     } catch (error) {
-      console.error('Error fetching Hosts:', error);
+      console.error("Error fetching Hosts:", error);
     }
   };
 
   useEffect(() => {
-
     fetchHosts();
   }, []);
 
-  const users = Hosts.map(Host => ({
-    _id: Host._id, // Include the ID here
+  const users = Hosts.map((Host) => ({
+    _id: Host._id,
     username: Host.username,
-    country: Host.country, 
+    country: Host.country,
     status: Host.status,
     age: Host.age,
-    phone: Host.phone, 
+    phone: Host.phone,
     avatar: Host.image || null,
     email: Host.email,
   }));
 
-  const handleAddUser   = async () => {
+  const handleAddUser = async () => {
     try {
-      await axios.post('http://localhost:5000/api/admin/auth/add-host', newUser  , { withCredentials: true });
-      setNewUser  ({ password: "", username: "", email: "", age: "", phone: "", country:"" });
+      await axiosInstance.post("/admin/auth/add-host", newUser, {
+        withCredentials: true,
+      });
+      setNewUser({
+        password: "",
+        username: "",
+        email: "",
+        age: "",
+        phone: "",
+        country: "",
+      });
       onOpenChange(false);
-      
-      const response = await axios.get('http://localhost:5000/api/admin/all-hosts', { withCredentials: true });
+
+      const response = await axiosInstance.get("/admin/all-hosts", {
+        withCredentials: true,
+      });
       setHosts(response.data);
-      
-      toast.success('Host created successfully!');
+
+      toast.success("Host created successfully!");
     } catch (error) {
-      console.error('Error adding user:', error);
-      toast.error('Failed to create Host. Please try again.');
+      console.error("Error adding user:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to create user. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -107,7 +132,7 @@ export default function App() {
     switch (columnKey) {
       case "username":
         return (
-          <User     
+          <User
             avatarProps={{
               radius: "lg",
               src: user.avatar || undefined,
@@ -117,13 +142,18 @@ export default function App() {
             name={cellValue}
           >
             {user.email}
-          </User  >
+          </User>
         );
       case "country":
         return <p className="text-small text-gray-500">{cellValue}</p>;
       case "status":
         return (
-          <Chip className="capitalize" color={statusColorMap[user.status]} size="sm" variant="flat">
+          <Chip
+            className="capitalize"
+            color={statusColorMap[user.status]}
+            size="sm"
+            variant="flat"
+          >
             {cellValue}
           </Chip>
         );
@@ -137,10 +167,20 @@ export default function App() {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem key="view">View</DropdownItem>
+                <DropdownItem
+                  key="view"
+                  onClick={() => navigate(`/all-users/host/${user._id}`)}
+                >
+                  View
+                </DropdownItem>
                 <DropdownItem key="suspend">Suspend</DropdownItem>
                 <DropdownItem key="restrict">
-                <ToggleUser  userId={user._id} userType="host" currentStatus={user.status} onSuccess={fetchHosts} />
+                  <ToggleUser
+                    userId={user._id}
+                    userType="host"
+                    currentStatus={user.status}
+                    onSuccess={fetchHosts}
+                  />
                 </DropdownItem>
                 <DropdownItem key="delete">Delete</DropdownItem>
               </DropdownMenu>
@@ -152,8 +192,10 @@ export default function App() {
     }
   }, []);
 
-  const filteredUsers = users.filter(user => 
-    user.username && user.username.toLowerCase().includes(filterValue.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.username &&
+      user.username.toLowerCase().includes(filterValue.toLowerCase())
   );
 
   const pagesCount = Math.ceil(filteredUsers.length / rowsPerPage);
@@ -185,7 +227,9 @@ export default function App() {
           </div>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-default-400 text-small">Total {filteredUsers.length} users</span>
+          <span className="text-default-400 text-small">
+            Total {filteredUsers.length} users
+          </span>
           <label className="flex items-center text-default-400 text-small">
             Rows per page:
             <select
@@ -208,8 +252,7 @@ export default function App() {
   const bottomContent = React.useMemo(() => {
     return (
       <div className="py-2 px-2 flex justify-between items-center">
-        <span className="w-[30%] text-small text-default-400">
-        </span>
+        <span className="w-[30%] text-small text-default-400"></span>
         <Pagination
           isCompact
           showControls
@@ -220,10 +263,20 @@ export default function App() {
           onChange={setPage}
         />
         <div className="hidden sm:flex w-[30%] justify-end gap-2">
-          <Button isDisabled={page === 1} size="sm" variant="flat" onPress={() => setPage(page - 1)}>
+          <Button
+            isDisabled={page === 1}
+            size="sm"
+            variant="flat"
+            onPress={() => setPage(page - 1)}
+          >
             Previous
           </Button>
-          <Button isDisabled={page === pagesCount} size="sm" variant="flat" onPress={() => setPage(page + 1)}>
+          <Button
+            isDisabled={page === pagesCount}
+            size="sm"
+            variant="flat"
+            onPress={() => setPage(page + 1)}
+          >
             Next
           </Button>
         </div>
@@ -238,44 +291,58 @@ export default function App() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">Add New User</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1">
+                Add New User
+              </ModalHeader>
               <ModalBody>
                 <Input
                   placeholder="userName"
-                  value={newUser .username}
-                  onChange={(e) => setNewUser ({ ...newUser , username: e.target.value })}
+                  value={newUser.username}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, username: e.target.value })
+                  }
                 />
                 <Input
                   placeholder="Email"
-                  value={newUser .email}
-                  onChange={(e) => setNewUser ({ ...newUser , email: e.target.value })}
+                  value={newUser.email}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, email: e.target.value })
+                  }
                 />
                 <Input
                   placeholder="Password"
-                  value={newUser .password}
-                  onChange={(e) => setNewUser ({ ...newUser , password: e.target.value })}
+                  value={newUser.password}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, password: e.target.value })
+                  }
                 />
                 <Input
                   placeholder="Age"
-                  value={newUser .age}
-                  onChange={(e) => setNewUser ({ ...newUser , age: e.target.value })}
+                  value={newUser.age}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, age: e.target.value })
+                  }
                 />
                 <Input
                   placeholder="phone"
-                  value={newUser .phone}
-                  onChange={(e) => setNewUser ({ ...newUser , phone: e.target.value })}
+                  value={newUser.phone}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, phone: e.target.value })
+                  }
                 />
                 <Input
                   placeholder="Country"
-                  value={newUser .country}
-                  onChange={(e) => setNewUser ({ ...newUser , country: e.target.value })}
+                  value={newUser.country}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, country: e.target.value })
+                  }
                 />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" onPress={handleAddUser }>
+                <Button color="primary" onPress={handleAddUser}>
                   Add User
                 </Button>
               </ModalFooter>
@@ -310,7 +377,9 @@ export default function App() {
         <TableBody emptyContent={"No users found"} items={items}>
           {(item) => (
             <TableRow key={item.email}>
-              {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+              {(columnKey) => (
+                <TableCell>{renderCell(item, columnKey)}</TableCell>
+              )}
             </TableRow>
           )}
         </TableBody>

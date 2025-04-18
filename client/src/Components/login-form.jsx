@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
+import axiosInstance from "../utils/axios-instance";
 import { setUserInfo, setAllowedPages } from "../redux/slice/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/Components/ui/button";
@@ -17,7 +17,7 @@ const LoginForm = ({ className, ...props }) => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false); 
 
   const validate = () => {
     let errors = {};
@@ -34,10 +34,10 @@ const LoginForm = ({ className, ...props }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (validate()) {
-      setLoading(true); // Set loading to true
+      setLoading(true); 
       try {
-        const response = await axios.post(
-          "http://localhost:5000/api/admin/auth/login",
+        const response = await axiosInstance.post(
+          "/admin/auth/login",
           { email, password },
           { withCredentials: true }
         );
@@ -54,7 +54,7 @@ const LoginForm = ({ className, ...props }) => {
         const errorMessage = error?.response?.data?.message || "Login failed. Please try again.";
         toast.error(errorMessage);
       } finally {
-        setLoading(false); // Reset loading state
+        setLoading(false); 
       }
     }
   };

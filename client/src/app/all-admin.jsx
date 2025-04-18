@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../utils/axios-instance";
 import {
   Table,
   TableHeader,
@@ -25,7 +25,7 @@ import {
 } from "@heroui/react";
 import { PlusIcon } from "lucide-react";
 import { ToastContainer, toast } from 'react-toastify';
-import ToggleUser  from "@/utils/Restrict"; // Ensure this path is correct
+import ToggleUser from "@/utils/Restrict"; 
 
 export const columns = [
   { name: "NAME", uid: "name", sortable: false },
@@ -45,24 +45,43 @@ const statusColorMap = {
 
 const INITIAL_VISIBLE_COLUMNS = ["name", "position", "mobile", "status", "actions"];
 
+const EMPTY_USER = {
+  password: "",
+  name: "",
+  email: "",
+  role: "",
+  position: "",
+  age: "",
+  mobile: "", 
+  allowedPages: [],
+};
+
 export default function App() {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [editUser , setEditUser ] = React.useState(null);
+  const { isOpen, onOpen: originalOnOpen, onOpenChange: originalOnOpenChange } = useDisclosure();
+  const [editUser, setEditUser] = React.useState(null);
   const [filterValue, setFilterValue] = React.useState("");
   const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS));
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [page, setPage] = React.useState(1);
   const [admins, setAdmins] = React.useState([]);
-  const [newUser  , setNewUser  ] = React.useState({
-    password: "",
-    name: "",
-    email: "",
-    role: "",
-    position: "",
-    age: "",
-    mobile: "", 
-    allowedPages: [],
-  });
+  const [newUser, setNewUser] = React.useState(EMPTY_USER);
+
+
+  const onOpen = () => {
+    if (!editUser) {
+      setNewUser(EMPTY_USER);
+    }
+    originalOnOpen();
+  };
+
+
+  const onOpenChange = (open) => {
+    if (!open) {
+      setNewUser(EMPTY_USER);
+      setEditUser(null);
+    }
+    originalOnOpenChange(open);
+  };
 
   const pages = [
     "home",
@@ -78,12 +97,12 @@ export default function App() {
 
   const fetchAdmins = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/all-admins', { withCredentials: true });
+      const response = await axiosInstance.get('/admin/all-admins', { withCredentials: true });
       setAdmins(response.data);
     } catch (error) {
       console.error('Error fetching admins:', error);
       const errorMessage = error.response?.data?.message || 'Failed to Update user. Please try again.';
-      toast.error(errorMessage)
+      toast.error(errorMessage);
     }
   };
 
@@ -95,18 +114,18 @@ export default function App() {
     _id: admin._id,
     name: admin.name,
     position: admin.position, 
-    role:admin.role,
+    role: admin.role,
     status: admin.status,
-    allowedPages:admin.allowedPages,
+    allowedPages: admin.allowedPages,
     age: admin.age,
     mobile: admin.mobile, 
     avatar: admin.image || null,
     email: admin.email,
   }));
 
-  const handleEditUser  = (user) => {
-    setEditUser (user); 
-    setNewUser ({
+  const handleEditUser = (user) => {
+    setEditUser(user); 
+    setNewUser({
       name: user.name,
       email: user.email,
       password: "", 
@@ -116,34 +135,34 @@ export default function App() {
       mobile: user.mobile,
       allowedPages: user.allowedPages || [],
     });
-    onOpen(); 
+    originalOnOpen(); 
   };
 
-  const handleAddUser   = async () => {
+  const handleAddUser = async () => {
     try {
-      await axios.post('http://localhost:5000/api/admin/auth/add-admin', newUser  , { withCredentials: true });
-      setNewUser  ({ password: "", name: "", email: "", role: "", position: "", age: "", mobile: "", allowedPages: [] });
+      await axiosInstance.post('/admin/auth/add-admin', newUser, { withCredentials: true });
+      setNewUser(EMPTY_USER);
       onOpenChange(false);
       
       fetchAdmins();
       
-      toast.success('User  created successfully!');
+      toast.success('User created successfully!');
     } catch (error) {
       console.error('Error adding user:', error);
-
-      toast.error('Failed to create user. Please try again.');
+      const errorMessage = error.response?.data?.message || 'Failed to create user. Please try again.';
+      toast.error(errorMessage);
     }
   };
 
-  const handleUpdateUser  = async () => {
+  const handleUpdateUser = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/auth/update-admin/${editUser ._id}`, newUser , { withCredentials: true });
-      setNewUser ({ password: "", name: "", email: "", role: "", position: "", age: "", mobile: "", allowedPages: [] });
-      setEditUser (null);
+      await axiosInstance.put(`/admin/auth/update-admin/${editUser._id}`, newUser, { withCredentials: true });
+      setNewUser(EMPTY_USER);
+      setEditUser(null);
       onOpenChange(false);
       
       fetchAdmins();
-      toast.success('User  updated successfully!');
+      toast.success('User updated successfully!');
     } catch (error) {
       console.error('Error updating user:', error);
       const errorMessage = error.response?.data?.message || 'Failed to Update user. Please try again.';
@@ -167,7 +186,7 @@ export default function App() {
             name={cellValue}
           >
             {user.email}
-          </User  >
+          </User>
         );
       case "position":
         return <p className="text-small text-gray-500">{cellValue}</p>;
@@ -188,9 +207,9 @@ export default function App() {
               </DropdownTrigger>
               <DropdownMenu>
                 <DropdownItem key="view">View</DropdownItem>
-                <DropdownItem key="edit" onClick={() => handleEditUser (user)}>Edit</DropdownItem>
+                <DropdownItem key="edit" onClick={() => handleEditUser(user)}>Edit</DropdownItem>
                 <DropdownItem key="toggle">
-                  <ToggleUser  userId={user._id} userType="admin" currentStatus={user.status} onSuccess={fetchAdmins} />
+                  <ToggleUser userId={user._id} userType="admin" currentStatus={user.status} onSuccess={fetchAdmins} />
                 </DropdownItem>
                 <DropdownItem key="delete">Delete</DropdownItem>
               </DropdownMenu>
@@ -285,81 +304,82 @@ export default function App() {
     <div className="p-5">
       <ToastContainer />
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-  <ModalContent>
-    {(onClose) => (
-      <>
-        <ModalHeader className="flex flex-col gap-1">
-          {editUser  ? "Edit User" : "Add New User"}
-        </ModalHeader>
-        <ModalBody>
-          <Input
-            placeholder="Name"
-            value={newUser .name}
-            onChange={(e) => setNewUser ({ ...newUser , name: e.target.value })}
-          />
-          <Input
-            placeholder="Email"
-            value={newUser .email}
-            onChange={(e) => setNewUser ({ ...newUser , email: e.target.value })}
-          />
-          <Input
-            placeholder="Password"
-            value={newUser .password}
-            onChange={(e) => setNewUser ({ ...newUser , password: e.target.value })}
-          />
-          <Input
-            placeholder="Role"
-            value={newUser .role}
-            onChange={(e) => setNewUser ({ ...newUser , role: e.target.value })}
-          />
-          <Input
-            placeholder="Position"
-            value={newUser .position}
-            onChange={(e) => setNewUser ({ ...newUser , position: e.target.value })}
-          />
-          <Input
-            placeholder="Age"
-            value={newUser .age}
-            onChange={(e) => setNewUser ({ ...newUser , age: e.target.value })}
-          />
-          <Input
-            placeholder="Mobile"
-            value={newUser .mobile}
-            onChange={(e) => setNewUser ({ ...newUser , mobile: e.target.value })}
-          />
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold">Select Allowed Pages:</h3>
-            <div className="flex flex-wrap">
-              {pages.map((page) => (
-                <label key={page} className="flex items-center w-1/2">
-                  <input
-                    type="checkbox"
-                    checked={newUser .allowedPages.includes(page)}
-                    onChange={() => {
-                      const updatedPages = newUser .allowedPages.includes(page)
-                        ? newUser .allowedPages.filter((p) => p !== page)
-                        : [...newUser .allowedPages, page];
-                      setNewUser ({ ...newUser , allowedPages: updatedPages });
-                    }}
-                  />
-                  <span className="ml-2">{page}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button color="danger" variant="light" onPress={onClose}>
-            Close
-          </Button>
-          <Button color="primary" onPress={editUser  ? handleUpdateUser  : handleAddUser }>
-            {editUser  ? "Update User" : "Add User"}
-          </Button>
-        </ModalFooter>
-      </>
-    )}
-  </ModalContent>
-</Modal>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                {editUser ? "Edit User" : "Add New User"}
+              </ModalHeader>
+              <ModalBody>
+                <Input
+                  placeholder="Name"
+                  value={newUser.name}
+                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                />
+                <Input
+                  placeholder="Email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                />
+                <Input
+                  placeholder="Password"
+                  type="password"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                />
+                <Input
+                  placeholder="Role"
+                  value={newUser.role}
+                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                />
+                <Input
+                  placeholder="Position"
+                  value={newUser.position}
+                  onChange={(e) => setNewUser({ ...newUser, position: e.target.value })}
+                />
+                <Input
+                  placeholder="Age"
+                  value={newUser.age}
+                  onChange={(e) => setNewUser({ ...newUser, age: e.target.value })}
+                />
+                <Input
+                  placeholder="Mobile"
+                  value={newUser.mobile}
+                  onChange={(e) => setNewUser({ ...newUser, mobile: e.target.value })}
+                />
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold">Select Allowed Pages:</h3>
+                  <div className="flex flex-wrap">
+                    {pages.map((page) => (
+                      <label key={page} className="flex items-center w-1/2">
+                        <input
+                          type="checkbox"
+                          checked={newUser.allowedPages.includes(page)}
+                          onChange={() => {
+                            const updatedPages = newUser.allowedPages.includes(page)
+                              ? newUser.allowedPages.filter((p) => p !== page)
+                              : [...newUser.allowedPages, page];
+                            setNewUser({ ...newUser, allowedPages: updatedPages });
+                          }}
+                        />
+                        <span className="ml-2">{page}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={editUser ? handleUpdateUser : handleAddUser}>
+                  {editUser ? "Update Admin" : "Add Admin"}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
 
       <Table
         isHeaderSticky

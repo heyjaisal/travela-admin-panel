@@ -4,7 +4,6 @@ const nodemailer = require("nodemailer");
 const Admin = require("../models/admin");
 const User = require("../models/user");
 const Host = require("../models/host");
-const { all } = require("../routes/auth.routes");
 require("dotenv").config();
 
 exports.superAdmin = async (req, res) => {
@@ -65,6 +64,9 @@ exports.loginAdmin = async (req, res) => {
       return res
         .status(403)
         .json({ message: "Your account is restricted from logging in." });
+
+       
+        
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch)
@@ -209,13 +211,15 @@ exports.createUser = async (req, res) => {
 
     const existingName = await User.findOne({ username });
 
+    if (existingName) {
+      return res.status(403).json({ message: "Username already exists" });
+    }
+
     if (existingEmail) {
       return res.status(403).json({ message: "Email already exists" });
     }
 
-    if (existingName) {
-      return res.status(403).json({ message: "Username already exists" });
-    }
+   
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -277,12 +281,12 @@ exports.createHost = async (req, res) => {
 
     const existingMobile = await Host.findOne({ phone });
 
-    if (existingEmail) {
-      return res.status(403).json({ message: "Email already exists" });
-    }
-
+ 
     if (existingName) {
       return res.status(403).json({ message: "Username already exists" });
+    }
+    if (existingEmail) {
+      return res.status(403).json({ message: "Email already exists" });
     }
 
     if (existingMobile) {
@@ -318,13 +322,11 @@ exports.createHost = async (req, res) => {
       subject: "Your TRAVELA app Login Details",
       text: `Hello ${username},
 
-Your TRAVELA account has been successfully created. Please log in to the app.
-
-
-Emial:${email}
-password:${password}
-Best regards,
-The Team`,
+     Your TRAVELA account has been successfully created. Please log in to the app.
+     Emial:${email}
+     password:${password}
+     Best regards,
+     The Team`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -357,15 +359,22 @@ exports.restrictUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.status = user.status === "Restricted" ? "active" : "Restricted";
+    const isNowRestricted = user.status !== "Restricted";
+
+    user.status = isNowRestricted ? "Restricted" : "active";
+    if ("isRestricted" in user) {
+      user.isRestricted = isNowRestricted;
+    }
+
     await user.save();
 
     res.status(200).json(user);
   } catch (error) {
     console.error("Error toggling user restriction:", error);
-    res.status(500).json({ message: "Server error",error });
+    res.status(500).json({ message: "Server error", error });
   }
 };
+
 
 exports.updateAdmin = async (req, res) => {
   const { id } = req.params;
@@ -396,10 +405,76 @@ exports.updateAdmin = async (req, res) => {
     admin.position = position || admin.position;
     admin.allowedPages = allowedPages || admin.allowedPages;
 
-    admin.save()
+    admin.save();
 
-    res.status(200).json({message:'Admin updated succesfully'})
+    res.status(200).json({ message: "Admin updated succesfully" });
   } catch (error) {
-    res.status(500).json({message:'Failed to updated Admin',error})
+    res.status(500).json({ message: "Failed to updated Admin", error });
+  }
+};
+
+exports.logout = async (req, res) => {
+
+  try {
+    res.cookie("token", "", { maxAge: 1, secure: true, sameSite: "None" });
+
+    return res.status(200).json("Logout Succesfull");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json("Internal server Error");
+  }
+};
+
+exports.getAdmin = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await Admin.findById(userId).select(
+      "email _id username image name age mobile position role country street city firstName lastName"
+    );
+
+    if (!user) return res.status(404).send("USER NOT FOUND");
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Internal Server Error");
+  }
+};
+
+exports.saveAdmin = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    
+    const { username, country, street, city, gender ,firstName,lastName} = req.body;
+   
+    
+
+  
+    const user = await Admin.findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    user.username = username || user.username;
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.country = country || user.country;
+    user.street = street || user.street;
+    user.city = city || user.city;
+    user.gender = gender || user.gender;
+
+    await user.save();
+
+    res.json({ success: true, message: "Profile updated successfully", user });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update profile" });
   }
 };
