@@ -4,7 +4,9 @@ const Host = require("../models/host");
 const Property = require("../models/property");
 const Events = require("../models/event");
 const Admin = require("../models/admin");
+const Booking = require("../models/booking");
 const cloudinary = require("../config/cloudinary");
+
 
 exports.userDetails = async (req, res) => {
   try {
@@ -29,72 +31,6 @@ exports.userDetails = async (req, res) => {
   }
 };
 
-exports.getUserBlogs = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { page = 1, limit = 10 } = req.query;
-
-    const skip = (Number(page) - 1) * Number(limit);
-
-    const blogs = await Blog.find({ author: id })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit))
-      .select("title thumbnail createdAt")
-      .populate("author", "username image")
-      .lean();
-
-    const totalBlogs = await Blog.countDocuments({ author: id });
-    const hasMore = skip + blogs.length < totalBlogs;
-
-    res.json({ blogs, hasMore });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-exports.getListings = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { type, page = 1, limit = 10 } = req.query;
-
-    if (!type) {
-      return res.status(400).json({ message: "Listing type is required" });
-    }
-
-    const skip = (Number(page) - 1) * Number(limit);
-    const query = { host: id };
-    let listings = [];
-    let totalListings = 0;
-
-    if (type === "property") {
-      totalListings = await Property.countDocuments(query);
-      listings = await Property.find(query)
-        .sort({ createdAt: -1 })
-        .select("propertyType images price country city")
-        .skip(skip)
-        .limit(Number(limit))
-        .lean();
-    } else if (type === "event") {
-      totalListings = await Events.countDocuments(query);
-      listings = await Events.find(query)
-        .sort({ createdAt: -1 })
-        .select("title images eventVenue country ticketPrice city")
-        .skip(skip)
-        .limit(Number(limit))
-        .lean();
-    } else {
-      return res.status(400).json({ message: "Invalid listing type" });
-    }
-
-    const hasMore = skip + listings.length < totalListings;
-    res.json({ listings, hasMore, type });
-  } catch (error) {
-    console.error("Error fetching listings:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-};
 
 exports.uploadImage = async (req, res) => {
   try {
@@ -121,13 +57,18 @@ exports.uploadImage = async (req, res) => {
       });
     };
 
-    const { secure_url: imageUrl, public_id } = await uploadToCloudinary(req.file.buffer, folder);
+    const { secure_url: imageUrl, public_id } = await uploadToCloudinary(
+      req.file.buffer,
+      folder
+    );
 
     if (req.body.type === "profile") {
-      await Admin.findByIdAndUpdate(req.user.id, { image: imageUrl }, { new: true });
+      await Admin.findByIdAndUpdate(
+        req.user.id,
+        { image: imageUrl },
+        { new: true }
+      );
     }
-  
-    
 
     res.status(200).json({ imageUrl, public_id, type: req.body.type });
   } catch (error) {
@@ -136,16 +77,14 @@ exports.uploadImage = async (req, res) => {
   }
 };
 
-
 exports.deleteImage = async (req, res) => {
   try {
     const { image, type } = req.body;
-    
 
     if (!image || !type)
       return res.status(400).json({ message: "No image or type provided" });
 
-    const models = { profile: Admin,};
+    const models = { profile: Admin };
     const model = models[type];
     if (!model) return res.status(400).json({ message: "Invalid type" });
 
@@ -166,5 +105,73 @@ exports.deleteImage = async (req, res) => {
   } catch (error) {
     console.error("Error deleting image:", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+exports.detailList = async (req, res) => {
+  const { id } = req.params;
+  const { type } = req.query;
+
+  let item;
+
+  try {
+    if (type === "event") {
+      item = await Events.findById(id)
+        .populate(
+          "host",
+          "username image email firstName lastName profileSetup stripeAccountId"
+        )
+        .lean();
+
+      item.features = Array.isArray(item.features) ? item.features : [];
+      item.images = Array.isArray(item.images) ? item.images : [];
+    } else if (type === "property") {
+      item = await Property.findById(id)
+        .populate(
+          "host",
+          "username image email firstName lastName stripeAccountId"
+        )
+        .lean();
+
+      item.features = Array.isArray(item.features) ? item.features : [];
+      item.images = Array.isArray(item.images) ? item.images : [];
+
+      const bookings = await Booking.find({
+        property: id,
+        bookingStatus: "confirmed",
+      }).select("checkIn checkOut");
+
+      item.bookedDates = bookings.map(({ checkIn, checkOut }) => ({
+        checkIn: checkIn.toISOString().split("T")[0],
+        checkOut: checkOut.toISOString().split("T")[0],
+      }));
+    } else {
+      return res.status(400).json({ error: "Invalid type parameter" });
+    }
+
+    if (!item) {
+      return res.status(404).json({ error: `${type} not found` });
+    }
+
+    res.json({ item });
+  } catch (error) {
+    console.error(`Error fetching ${type}:`, error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.getBlogById = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id)
+      .select("id title thumbnail createdAt content location author")
+      .populate("author", "username image");
+
+    if (!blog) return res.status(404).json({ error: "Blog not found" });
+
+    res.json(blog);
+  } catch (error) {
+    console.error("Error fetching blog:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

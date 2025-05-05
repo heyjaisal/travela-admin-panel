@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import { MoreVertical } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/Components/ui/avatar";
+import { useNavigate } from "react-router-dom";
 
 const BlogCard = ({ blog, onDelete }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
-    <div className="relative p-4 border rounded-lg flex flex-col md:flex-row gap-4 bg-white shadow-sm hover:shadow-md transition-all mb-4">
+    <div
+      onClick={() => navigate(`/blog/${blog._id}`)} 
+      className="relative p-4 border rounded-lg flex flex-col md:flex-row gap-4 bg-white shadow-sm hover:shadow-md transition-all mb-4 cursor-pointer"
+    >
       <img
         src={blog.thumbnail || "https://source.unsplash.com/random/400x250"}
         alt="Post Thumbnail"
@@ -23,12 +28,15 @@ const BlogCard = ({ blog, onDelete }) => {
           </div>
 
           <div className="relative">
-            <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 rounded-full hover:bg-gray-100">
+            <button onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }} className="p-2 rounded-full hover:bg-gray-100">
               <MoreVertical size={20} />
             </button>
             {menuOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg p-2 z-50">
-                <button onClick={() => onDelete(blog._id)} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 rounded-md">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDelete(blog._id); }}
+                  className="block w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 rounded-md"
+                >
                   Delete
                 </button>
               </div>

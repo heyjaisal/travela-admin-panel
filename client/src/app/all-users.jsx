@@ -75,7 +75,7 @@ export default function Allusers() {
   const fetchUsers = async () => {
     try {
       const response = await axiosInstance.get(
-        "/admin/all-users",
+        "/listing/all-users",
         { withCredentials: true }
       );
    
@@ -102,11 +102,11 @@ export default function Allusers() {
 
   const handleAddUser  = async () => {
     try {
-      await axiosInstance.post("/admin/auth/add-user", newUser , { withCredentials: true });
+      await axiosInstance.post("/admin/add-user", newUser , { withCredentials: true });
       setNewUser ({ password: '', username: '', email: '', age: '', country: '' });
       onOpenChange(false);
 
-      const response = await axiosInstance.get('/admin/all-users', { withCredentials: true });
+      const response = await axiosInstance.get('/listing/all-users', { withCredentials: true });
       setUsers(response.data);
 
       toast.success('User  created successfully');

@@ -36,7 +36,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/admin/auth/profile`, {
+        const response = await axios.get(`${API_BASE_URL}/api/auth/profile`, {
           withCredentials: true,
         });
         setProfile(response.data);

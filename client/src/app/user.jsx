@@ -19,7 +19,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await axiosInstance.get(`/admin/profile/${id}`, { 
+        const response = await axiosInstance.get(`/user/${id}`, { 
           params: { type: 'user' },
           withCredentials: true 
         });        
@@ -36,7 +36,7 @@ const ProfilePage = () => {
     isLoading.current = true;
     
     try {
-      const { data } = await axiosInstance.get(`/admin/profile/${id}/blogs`, {
+      const { data } = await axiosInstance.get(`/listing/${id}/blogs`, {
         withCredentials: true,
         params: { page, limit: 2 },
       });

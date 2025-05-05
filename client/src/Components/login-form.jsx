@@ -37,7 +37,7 @@ const LoginForm = ({ className, ...props }) => {
       setLoading(true); 
       try {
         const response = await axiosInstance.post(
-          "/admin/auth/login",
+          "/auth/login",
           { email, password },
           { withCredentials: true }
         );

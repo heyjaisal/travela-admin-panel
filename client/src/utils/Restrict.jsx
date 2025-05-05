@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 const ToggleUser = ({ userId, userType, currentStatus, onSuccess }) => {
   const handleToggleUser = async () => {
     try {
-      await axiosInstance.put(`/admin/auth/change-restrict/${userId}`, { type: userType }, { withCredentials: true });
+      await axiosInstance.put(`/auth/change-restrict/${userId}`, { type: userType }, { withCredentials: true });
       
       
       if (onSuccess) {

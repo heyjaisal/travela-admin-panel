@@ -37,7 +37,7 @@ const ProfilePage = () => {
   useOnceEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get('/admin/auth/profile', {
+        const response = await axiosInstance.get('/auth/profile', {
           withCredentials: true,
         });
         setProfile(response.data.user);
@@ -79,7 +79,7 @@ const ProfilePage = () => {
   
       try {
         const { data } = await axiosInstance.put(
-          '/admin/auth/profile',
+          '/auth/profile',
           Profile,
           { withCredentials: true }
         );
@@ -100,7 +100,7 @@ const ProfilePage = () => {
   };
 
   const logOut = async () => {
-    const response = await axiosInstance.get('/admin/auth/logout', {
+    const response = await axiosInstance.get('/auth/logout', {
       withCredentials: true,
     });
   
@@ -123,7 +123,7 @@ const ProfilePage = () => {
     setLoading(true);
     try {
       const response = await axiosInstance.post(
-       '/admin/upload',
+       '/user/upload',
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -149,7 +149,7 @@ const ProfilePage = () => {
     setLoading(true);
     try {
       const response = await axiosInstance.delete(
-        '/admin/delete',
+        '/user/delete',
         {
           withCredentials: true,
           data: {

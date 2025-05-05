@@ -97,7 +97,7 @@ export default function App() {
 
   const fetchAdmins = async () => {
     try {
-      const response = await axiosInstance.get('/admin/all-admins', { withCredentials: true });
+      const response = await axiosInstance.get('/listing/all-admins', { withCredentials: true });
       setAdmins(response.data);
     } catch (error) {
       console.error('Error fetching admins:', error);
@@ -140,7 +140,7 @@ export default function App() {
 
   const handleAddUser = async () => {
     try {
-      await axiosInstance.post('/admin/auth/add-admin', newUser, { withCredentials: true });
+      await axiosInstance.post('/admin/add-admin', newUser, { withCredentials: true });
       setNewUser(EMPTY_USER);
       onOpenChange(false);
       
@@ -156,7 +156,7 @@ export default function App() {
 
   const handleUpdateUser = async () => {
     try {
-      await axiosInstance.put(`/admin/auth/update-admin/${editUser._id}`, newUser, { withCredentials: true });
+      await axiosInstance.put(`/auth/update-admin/${editUser._id}`, newUser, { withCredentials: true });
       setNewUser(EMPTY_USER);
       setEditUser(null);
       onOpenChange(false);

@@ -4,6 +4,7 @@ import axiosInstance from "../utils/axios-instance";
 import ListingCard from "../Components/cards/listing-card";
 import { ScaleLoader } from "react-spinners";
 import InfiniteScroll from "react-infinite-scroll-component";
+import HostDashboard from "@/charts/host-all-charts";
 
 const ProfilePage = () => {
   const { id } = useParams();
@@ -19,7 +20,7 @@ const ProfilePage = () => {
     const fetchUserDetails = async () => {
       try {
         const response = await axiosInstance.get(
-          `/admin/profile/${id}`,
+          `/user/${id}`,
           {
             params: { type: "host" },
             withCredentials: true,
@@ -39,7 +40,7 @@ const ProfilePage = () => {
 
     try {
       const { data } = await axiosInstance.get(
-        `/admin/profile/${id}/listings`,
+        `/listing/${id}/listings`,
         {
           withCredentials: true,
           params: { type: listingType, page, limit: 10 },
@@ -145,8 +146,13 @@ const ProfilePage = () => {
             <p className="text-gray-500 text-sm">{user.email}</p>
             <p className="text-gray-500 text-sm">{user.gender}</p>
             <p className="text-black text-lg">{user.followerCount} followers</p>
+
+            <div className="p-4">
+          <HostDashboard id={id} />
+        </div>
           </div>
         )}
+        
       </div>
       <div className="hidden md:block w-1/3 p-4 border-l sticky top-0 h-screen">
         <div className="text-center">

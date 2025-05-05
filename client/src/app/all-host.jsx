@@ -72,7 +72,7 @@ export default function App() {
   });
   const fetchHosts = async () => {
     try {
-      const response = await axiosInstance.get("/admin/all-hosts", {
+      const response = await axiosInstance.get("/listing/all-hosts", {
         withCredentials: true,
       });
       setHosts(response.data);
@@ -98,7 +98,7 @@ export default function App() {
 
   const handleAddUser = async () => {
     try {
-      await axiosInstance.post("/admin/auth/add-host", newUser, {
+      await axiosInstance.post("/admin/add-host", newUser, {
         withCredentials: true,
       });
       setNewUser({
@@ -111,7 +111,7 @@ export default function App() {
       });
       onOpenChange(false);
 
-      const response = await axiosInstance.get("/admin/all-hosts", {
+      const response = await axiosInstance.get("/listing/all-hosts", {
         withCredentials: true,
       });
       setHosts(response.data);

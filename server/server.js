@@ -5,6 +5,7 @@ const createRoutes = require('./routes/admin.routes');
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require('./routes/user.routes');
 const graphRoutes = require('./routes/graphs.routes')
+const listingRoutes = require('./routes/listing.routes')
 const path = require('path')
 require('dotenv').config();
 const cookieParser = require("cookie-parser");
@@ -26,8 +27,9 @@ app.use(cors({
 }));
 
 app.use('/api/admin', createRoutes); 
-app.use('/api/admin/auth',authRoutes);
-app.use('/api/admin/profile',userRoutes);
+app.use('/api/auth',authRoutes);
+app.use('/api/listing',listingRoutes);
+app.use('/api/user/',userRoutes);
 app.use('/api/graphs',graphRoutes)
 app.use(express.static(path.join(__dirname, 'public')));
 
