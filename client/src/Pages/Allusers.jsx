@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Users from "../app/all-users";
-import Host from "../app/all-host";
+import Users from "../listing/all-users";
+import Host from "../listing/all-host";
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 

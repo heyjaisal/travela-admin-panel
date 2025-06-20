@@ -3,7 +3,18 @@ const nodemailer = require("nodemailer");
 const Admin = require("../models/admin");
 const User = require("../models/user");
 const Host = require("../models/host");
+const Content = require("../models/Content");
 require("dotenv").config();
+
+function updateFixedArray(existingArray, updates, requiredLength, sectionName) {
+  if (!Array.isArray(updates) || updates.length !== requiredLength) {
+    throw new Error(`${sectionName} must have exactly ${requiredLength} items`);
+  }
+
+  return existingArray.map((item, index) => {
+    return { ...item.toObject(), ...updates[index] };
+  });
+}
 
 exports.AdminData = async (req, res) => {
   try {
@@ -263,4 +274,85 @@ exports.createHost = async (req, res) => {
   }
 };
 
+exports.getHomepageContent = async (req, res) => {
+  try {
+    const content = await Content.findOne();
+    if (!content) return res.status(404).json({ message: 'Content not found' });
+    res.json(content);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
+exports.updateCardItem = async (req, res) => {
+  const { id } = req.params;
+  const { title, subtitle, image, span, route, blur } = req.body;
+
+  if (!title || !subtitle || !image || !span || !route || blur === undefined) {
+    return res.status(400).json({ message: 'All card fields are required.' });
+  }
+
+  try {
+    const content = await Content.findOne();
+    const cardIndex = content.cardItems.findIndex(card => card._id.toString() === id);
+
+    if (cardIndex === -1) return res.status(404).json({ message: 'Card not found.' });
+
+    content.cardItems[cardIndex] = { ...content.cardItems[cardIndex]._doc, title, subtitle, image, span, route, blur };
+
+    await content.save();
+    res.json({ message: 'Card updated successfully.', card: content.cardItems[cardIndex] });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+exports.updateFaqItem = async (req, res) => {
+  const { id } = req.params;
+  const { question, answer, isActive } = req.body;
+
+  if (!question || !answer || isActive === undefined) {
+    return res.status(400).json({ message: 'All FAQ fields are required.' });
+  }
+
+  try {
+    const content = await Content.findOne();
+    const faqIndex = content.faqList.findIndex(faq => faq._id.toString() === id);
+
+    if (faqIndex === -1) return res.status(404).json({ message: 'FAQ not found.' });
+
+    content.faqList[faqIndex] = { ...content.faqList[faqIndex]._doc, question, answer, isActive };
+
+    await content.save();
+    res.json({ message: 'FAQ updated successfully.', faq: content.faqList[faqIndex] });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+exports.updateTestimonial = async (req, res) => {
+  const { id } = req.params;
+  const { fullName, picture, designation, description } = req.body;
+
+  if (!fullName || !picture || !designation || !description) {
+    return res.status(400).json({ message: 'All testimonial fields are required.' });
+  }
+
+  try {
+    const content = await Content.findOne();
+    const testimonialIndex = content.testimonialList.findIndex(t => t._id.toString() === id);
+
+    if (testimonialIndex === -1) return res.status(404).json({ message: 'Testimonial not found.' });
+
+    content.testimonialList[testimonialIndex] = {
+      ...content.testimonialList[testimonialIndex]._doc,
+      author: { fullName, picture, designation },
+      description
+    };
+
+    await content.save();
+    res.json({ message: 'Testimonial updated successfully.', testimonial: content.testimonialList[testimonialIndex] });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error.' });
+  }
+};

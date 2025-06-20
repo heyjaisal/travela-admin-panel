@@ -15,6 +15,7 @@ import {
   ClipboardList,
   CalendarDays,
   User,
+  SettingsIcon,
 } from "lucide-react";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import logo from "../../assets/logo.png";
@@ -22,11 +23,11 @@ import logo from "../../assets/logo.png";
 const allRoutes = [
   { to: "/home", icon: Home, text: "Home", permission: "home" },
   { to: "/create", icon: Plus, text: "Create", permission: "create" },
-  { to: "/payments", icon: Wallet, text: "Payments", permission: "payments" },
   { to: "/all-users", icon: ClipboardList, text: "All Users", permission: "all-users" },
   { to: "/approval", icon: CalendarDays, text: "Approval", permission: "approval" },
   { to: "/notifications", icon: Bell, text: "Notifications", permission: "notifications" },
   { to: "/profile", icon: User, text: "Profile", permission: "profile" },
+  { to: "/settings", icon: SettingsIcon, text: "Settings", permission: "settings" },
 ];
 
 export default function Navigation() {
@@ -67,6 +68,7 @@ function MobileNavbar({ routes }) {
         <img src={logo} alt="logo" className="w-5 h-5 ml-11" />
         <div className="flex items-center gap-4">
           <Plus onClick={() => navigate("/create")} className="text-xl cursor-pointer" />
+          <Settings onClick={() => navigate("/content")} className="text-xl cursor-pointer" />
           <Avatar className="h-7 w-7 cursor-pointer" onClick={() => navigate("/profile")}>
             {image ? (
               <AvatarImage src={image} alt="Profile" className="w-full h-full" />

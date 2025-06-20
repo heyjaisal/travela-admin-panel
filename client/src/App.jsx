@@ -1,5 +1,5 @@
 import React, { useEffect, useState, lazy, Suspense } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axiosInstance from "./utils/axios-instance";
 import { ScaleLoader } from "react-spinners";
@@ -7,30 +7,31 @@ import { ScaleLoader } from "react-spinners";
 import { setUserInfo, setAllowedPages } from "./redux/slice/auth";
 import ProtectedRoute from "./utils/Protectedroutes";
 
+// Lazy-loaded pages
 const AdminDashboardLayout = lazy(() => import("./Components/Navbar/Navbar-layout"));
 const LoginPage = lazy(() => import("./Pages/Login"));
 const HomePage = lazy(() => import("./Pages/Dashboard"));
-const PaymentsPage = lazy(() => import("./Pages/Payment"));
 const UsersPage = lazy(() => import("./Pages/Allusers"));
 const UserDetails = lazy(() => import("./app/user"));
+const HostDetails = lazy(() => import("./app/host"));
 const NotificationsPage = lazy(() => import("./Pages/Notification"));
-const Create = lazy(() => import("./app/all-admin"));
+const Create = lazy(() => import("./listing/all-admin"));
 const ProfilePage = lazy(() => import("./Pages/ProfileSettings"));
 const Message = lazy(() => import("./Pages/Messages"));
 const Approval = lazy(() => import("./Pages/Approval"));
-const HostDetails = lazy(() => import("./app/host"));
-const PropertyDetails = lazy(() => import("./app/property"));
-const EventDetails = lazy(() => import("./app/event"));
+const PropertyDetails = lazy(() => import("./property/property"));
+const EventDetails = lazy(() => import("./event/event"));
 const BlogDetails = lazy(() => import("./app/blog"));
-const PropertyPage = lazy(() => import("./app/property-page"));
-const EventPage = lazy(() => import("./app/event-page"));
+const Content = lazy(() => import("./app/Content"));
+const PropertyPage = lazy(() => import("./property/property-page"));
+const EventPage = lazy(() => import("./event/event-page"));
 
+// Mapping routes by permission name
 const pages = {
   home: HomePage,
   notifications: NotificationsPage,
   profile: ProfilePage,
   messages: Message,
-  payments: PaymentsPage,
   "all-users": UsersPage,
   approval: Approval,
   create: Create,
@@ -39,12 +40,11 @@ const pages = {
 const App = () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const user = useSelector((state) => state.auth.userInfo);
   const allowedPages = useSelector((state) => state.auth.allowedPages) || [];
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchAdminData = async () => {
       try {
         const response = await axiosInstance.get("/auth/admin-data", { withCredentials: true });
@@ -61,8 +61,7 @@ const App = () => {
     };
 
     fetchAdminData();
-  }, [dispatch, navigate]);
-
+  }, [dispatch]);
 
   if (loading) {
     return (
@@ -81,7 +80,11 @@ const App = () => {
       }
     >
       <Routes>
-        <Route path="/" element={user ? <AdminDashboardLayout /> : <LoginPage />}>
+        <Route
+          path="/"
+          element={user ? <AdminDashboardLayout /> : <LoginPage />}
+        >
+
           {allowedPages.map((page) =>
             pages[page] ? (
               <Route
@@ -98,28 +101,35 @@ const App = () => {
 
           {allowedPages.includes("all-users") && (
             <>
-              {["user", "host"].map((type) => (
-                <Route
-                  key={type}
-                  path={`/all-users/${type}/:id`}
-                  element={
-                    <ProtectedRoute permission="all-users">
-                      {type === "user" ? <UserDetails /> : <HostDetails />}
-                    </ProtectedRoute>
-                  }
-                />
-              ))}
+              <Route
+                path="/all-users/user/:id"
+                element={
+                  <ProtectedRoute permission="all-users">
+                    <UserDetails />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/all-users/host/:id"
+                element={
+                  <ProtectedRoute permission="all-users">
+                    <HostDetails />
+                  </ProtectedRoute>
+                }
+              />
             </>
           )}
-
+       
           <Route path="/property/:id" element={<PropertyDetails />} />
           <Route path="/event/:id" element={<EventDetails />} />
           <Route path="/blog/:id" element={<BlogDetails />} />
         </Route>
-
+      
+        <Route path="/content" element={<Content />} />
         <Route path="/event/:id" element={<EventPage />} />
         <Route path="/property/:id" element={<PropertyPage />} />
-        <Route path="*" element={<Navigate to={user ? "/home" : "/"} />} />
+
+        <Route path="*" element={<Navigate to={user ? "/home" : "/"} replace />} />
       </Routes>
     </Suspense>
   );

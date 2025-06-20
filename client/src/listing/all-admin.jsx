@@ -90,6 +90,7 @@ export default function App() {
     "messages",
     "payments",
     "all-users",
+    "settings",
     "requests",
     "approval",
     "create",
