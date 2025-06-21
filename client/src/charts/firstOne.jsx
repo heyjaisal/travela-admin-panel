@@ -29,6 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/Components/ui/table"
+import axiosInstance from "@/utils/axios-instance"
 
 const columns = [
   {
@@ -100,7 +101,7 @@ export default function DataTableDemo() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/graphs/latest-bookings",{withCredentials:true})
+        const res = await axiosInstance.get("/graphs/latest-bookings",{withCredentials:true})
         setData(res.data)
       } catch (err) {
         console.error("Failed to fetch data", err)

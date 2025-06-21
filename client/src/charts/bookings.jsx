@@ -16,6 +16,7 @@ import {
 } from "@/Components/ui/chart"
 
 import { useOnceEffect } from "@/hooks/useeffectOnce"
+import axiosInstance from "@/utils/axios-instance"
 
 const chartConfig = {
   views: {
@@ -38,8 +39,8 @@ export default function Linechart() {
   useOnceEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:8000/api/graphs/line-graph",
+        const res = await axiosInstance.get(
+          "/graphs/line-graph",
           { withCredentials: true }
         )
         setChartData(res.data)
