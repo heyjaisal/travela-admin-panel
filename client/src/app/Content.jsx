@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "@/utils/axios-instance";
 import {
   Dialog,
@@ -11,9 +12,12 @@ import { Textarea } from "@/Components/ui/textarea";
 import { Button } from "@/Components/ui/button";
 import { Label } from "@/Components/ui/label";
 import { toast } from "react-toastify";
+import { ArrowLeft } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function HomepageEditor() {
+  const navigate = useNavigate();
+
   const [data, setData] = useState(null);
   const [editing, setEditing] = useState(null);
   const [type, setType] = useState(null);
@@ -143,7 +147,19 @@ export default function HomepageEditor() {
 
   return (
     <div className="p-6 space-y-10">
-      <h2 className="text-2xl font-bold">Edit Homepage Content</h2>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/home")}
+          className="flex items-center gap-1"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+      </div>
+
+      <h2 className="text-2xl font-bold mt-4">Edit Homepage Content</h2>
 
       {data && (
         <>
