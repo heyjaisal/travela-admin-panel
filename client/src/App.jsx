@@ -26,7 +26,6 @@ const Content = lazy(() => import("./app/Content"));
 const PropertyPage = lazy(() => import("./property/property-page"));
 const EventPage = lazy(() => import("./event/event-page"));
 
-// Mapping routes by permission name
 const pages = {
   home: HomePage,
   notifications: NotificationsPage,
