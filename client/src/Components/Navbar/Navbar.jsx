@@ -25,7 +25,6 @@ const allRoutes = [
   { to: "/create", icon: Plus, text: "Create", permission: "create" },
   { to: "/all-users", icon: ClipboardList, text: "All Users", permission: "all-users" },
   { to: "/approval", icon: CalendarDays, text: "Approval", permission: "approval" },
-  { to: "/notifications", icon: Bell, text: "Notifications", permission: "notifications" },
   { to: "/profile", icon: User, text: "Profile", permission: "profile" },
   { to: "/settings", icon: SettingsIcon, text: "Settings", permission: "settings" },
 ];
