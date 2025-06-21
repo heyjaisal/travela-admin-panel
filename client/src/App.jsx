@@ -34,6 +34,7 @@ const pages = {
   "all-users": UsersPage,
   approval: Approval,
   create: Create,
+  settings: Content,
 };
 
 const App = () => {
@@ -124,7 +125,7 @@ const App = () => {
           <Route path="/blog/:id" element={<BlogDetails />} />
         </Route>
       
-        <Route path="/content" element={<Content />} />
+       
         <Route path="/event/:id" element={<EventPage />} />
         <Route path="/property/:id" element={<PropertyPage />} />
 
